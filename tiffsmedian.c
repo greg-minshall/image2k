@@ -70,6 +70,7 @@ main(int argc, char *argv[]) {
     while (argc > 0) {
         dofile(argv[0]);
         argv++;
+        argc--;
     }
     done();
 }
