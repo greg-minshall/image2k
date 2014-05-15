@@ -4,6 +4,15 @@
  * input files.
  */
 
+/*
+ * so, an image:
+
+L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
+ 
+ * has 143137152 data bytes, which is 5976*3992*6 == 23856192*6, i.e.,
+ * there are 2 bytes (16-bits) for each of R, G, and B.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +20,12 @@
 #include <sys/errno.h>
 
 #include <tiffio.h>
+
+/* these *should* be in tiffio.h, imho */
+#define TIFFPutR(abgr, r) (((abgr)&0xffffff00) | (((r)    )&0x000000ff))
+#define TIFFPutG(abgr, g) (((abgr)&0xffff00ff) | (((g)<< 8)&0x0000ff00))
+#define TIFFPutB(abgr, b) (((abgr)&0xff00ffff) | (((b)<<16)&0x00ff0000))
+#define TIFFPutA(abgr, a) (((abgr)&0x00ffffff) | (((a)<<24)&0xff000000))
 
 static uint32 www, hhh, len, nfiles;
 static uint32 *average = 0, *current = 0;
@@ -75,8 +90,7 @@ chkcompat(TIFF *x, char *file) {
 static void
 dofile(char *file) {
     TIFF *x;
-    unsigned int r0, r1, g0, g1, b0, b1, ret;
-    int p = 0;
+    int i;
 
     x  = TIFFOpen(file, "r");
     if (x == NULL) {
@@ -91,12 +105,24 @@ dofile(char *file) {
         chkcompat(x, file);
     }
 
-    if (TIFFReadRGBAImage(x, www, hhh, current, 0) == 0) {
-        fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
-        exit(8);
-        /*NOTREACHED*/
+    if (nfiles == 0) {          /* if this is first file */
+        /* read into averages */
+        if (TIFFReadRGBAImage(x, www, hhh, average, 0) == 0) {
+            fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
+            exit(8);
+            /*NOTREACHED*/
+        }
+    } else {                    /* else, read into current and process */
+        if (TIFFReadRGBAImage(x, www, hhh, current, 0) == 0) {
+            fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
+            exit(8);
+            /*NOTREACHED*/
+        }
+        for (i = 0; i < len; i++) {
+            
+        /* process TIFF */
     }
-    /* process TIFF */
+    nfiles++;                   /* processed another file */
     TIFFClose(x);
 }
 
