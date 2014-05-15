@@ -5,7 +5,7 @@
 
 int
 main() {
-    int avg32 = 0, avg16 = 0, navg16, oavg16;
+    int avg32 = 0, avg16 = 0, oavg16;
     int val, nvals = 0;
 
     while (scanf(" %x", &val) == 1) {
@@ -13,15 +13,13 @@ main() {
         avg32 += val;
         oavg16 = avg16;
         if (nvals) {
-            navg16 = (avg16 + ((val-avg16)/nvals))&0xffff;
+            avg16 = (oavg16 + ((val-oavg16)/nvals))&0xffff;
             /* fix up low order */
-            if ((((val-avg16)/nvals)*nvals) != (val-avg16)) {
-                if (val-avg16 > 0) {
+            if ((((val-oavg16)/nvals)*nvals) != (val-oavg16)) {
+                if (val-oavg16 > 0) {
                 } else {
-                    navg16--;
                 }
             }
-            avg16 = navg16;
         } else {
             avg16 = val&0xffff;
         }
@@ -33,7 +31,7 @@ main() {
         if (avg16 != (avg32/nvals)) {
             fprintf(stderr, "discrepancy: ");
             DUMP();
-            exit(2);
+//            exit(2);
         }
         DUMP();
     }
