@@ -6,11 +6,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <sys/errno.h>
 
 #include <tiffio.h>
 
 static uint32 www, hhh, len, nfiles;
-static uint32 *average = 0, uint32 *current = 0;
+static uint32 *average = 0, *current = 0;
 static int inited = 0;
 
 static void
@@ -41,7 +44,7 @@ ravg(int n, uint32 cur, uint32 new)
 static void
 init(TIFF *x) {
     TIFFGetField(x, TIFFTAG_IMAGEWIDTH, &www);
-    TIFFGetField(x, TIFFTAG_IMAGEHEIGHT, &hhh);
+    TIFFGetField(x, TIFFTAG_IMAGELENGTH, &hhh);
     len = www*hhh;
     average = (uint32*) _TIFFmalloc(len*sizeof(uint32));
     current = (uint32*) _TIFFmalloc(len*sizeof(uint32));
@@ -56,10 +59,10 @@ init(TIFF *x) {
 
 static void
 chkcompat(TIFF *x, char *file) {
-    uint 32 w, h;
+    uint32 w, h;
 
     TIFFGetField(x, TIFFTAG_IMAGEWIDTH, &w);
-    TIFFGetField(x, TIFFTAG_IMAGEHEIGHT, &h);
+    TIFFGetField(x, TIFFTAG_IMAGELENGTH, &h);
 
     if ((w != www) || (h != hhh)) {
         fprintf(stderr, "incompatible file \"%s\": (%d, %d) != (%d, %d)\n",
@@ -77,10 +80,17 @@ dofile(char *file) {
 
     x  = TIFFOpen(file, "r");
     if (x == NULL) {
-        fprintf(stderr, "unable to open \"%s\": %s\n", file, strerror());
+        fprintf(stderr, "unable to open \"%s\": %s\n", file, strerror(errno));
         exit(7);
         /*NOTREACHED*/
     }
+
+    if (!inited) {
+        init(x);
+    } else {
+        chkcompat(x, file);
+    }
+
     if (TIFFReadRGBAImage(x, www, hhh, current, 0) == 0) {
         fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
         exit(8);
@@ -92,13 +102,6 @@ dofile(char *file) {
 
 static void
 done() {
-    int p = 0;
-
-    for (p = 0; p < NPIXELS; p++) {
-        r[p] = r[p]/nfiles;
-        g[p] = g[p]/nfiles;
-        b[p] = b[p]/nfiles;
-    }
 }
 
 int
