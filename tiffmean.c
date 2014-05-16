@@ -21,14 +21,15 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include <tiffio.h>
 
-/* these *should* be in tiffio.h, imho */
+/* it seems like these *should* be in tiffio.h */
 #define TIFFPutR(abgr, r) (((abgr)&0xffffff00) | (((r)    )&0x000000ff))
 #define TIFFPutG(abgr, g) (((abgr)&0xffff00ff) | (((g)<< 8)&0x0000ff00))
 #define TIFFPutB(abgr, b) (((abgr)&0xff00ffff) | (((b)<<16)&0x00ff0000))
 #define TIFFPutA(abgr, a) (((abgr)&0x00ffffff) | (((a)<<24)&0xff000000))
 
 static uint32 www, hhh, len, nfiles;
-static uint32 *average = 0, *current = 0;
+static uint32 *current = 0;
+static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
 
 static void
@@ -61,9 +62,13 @@ init(TIFF *x) {
     TIFFGetField(x, TIFFTAG_IMAGEWIDTH, &www);
     TIFFGetField(x, TIFFTAG_IMAGELENGTH, &hhh);
     len = www*hhh;
-    average = (uint32*) _TIFFmalloc(len*sizeof(uint32));
+    rmean = (float*) _TIFFmalloc(len*sizeof(float));
+    gmean = (float*) _TIFFmalloc(len*sizeof(float));
+    bmean = (float*) _TIFFmalloc(len*sizeof(float));
+    amean = (float*) _TIFFmalloc(len*sizeof(float));
     current = (uint32*) _TIFFmalloc(len*sizeof(uint32));
-    if ((average == NULL) || (current == NULL)) {
+    if ((rmean == NULL) || (gmean == NULL) || (bmean == NULL) || (amean == NULL) ||
+        (current == NULL)) {
         perror("no room to initialize array");
         exit(5);
         /*NOTREACHED*/
@@ -90,7 +95,7 @@ chkcompat(TIFF *x, char *file) {
 static void
 dofile(char *file) {
     TIFF *x;
-    int i;
+    int i, val;
 
     x  = TIFFOpen(file, "r");
     if (x == NULL) {
@@ -105,22 +110,28 @@ dofile(char *file) {
         chkcompat(x, file);
     }
 
+    if (TIFFReadRGBAImage(x, www, hhh, current, 0) == 0) {
+        fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
+        exit(8);
+        /*NOTREACHED*/
+    }
     if (nfiles == 0) {          /* if this is first file */
-        /* read into averages */
-        if (TIFFReadRGBAImage(x, www, hhh, average, 0) == 0) {
-            fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
-            exit(8);
-            /*NOTREACHED*/
+        for (i = 0; i < len; i++) {
+            val = current[i];
+            rmean[i] = TIFFGetR(val)*1.0;
+            gmean[i] = TIFFGetG(val)*1.0;
+            bmean[i] = TIFFGetB(val)*1.0;
+            amean[i] = TIFFGetA(val)*1.0;
         }
     } else {                    /* else, read into current and process */
-        if (TIFFReadRGBAImage(x, www, hhh, current, 0) == 0) {
-            fprintf(stderr, "error in TIFFReadRGBAImage for \"%s\"\n", file);
-            exit(8);
-            /*NOTREACHED*/
-        }
         for (i = 0; i < len; i++) {
-            
-        /* process TIFF */
+            /* process TIFF */
+            val = current[i];
+            rmean[i] += (((TIFFGetR(val)*1.0)-rmean[i])/(nfiles*1.0));
+            gmean[i] += (((TIFFGetG(val)*1.0)-gmean[i])/(nfiles*1.0));
+            bmean[i] += (((TIFFGetB(val)*1.0)-bmean[i])/(nfiles*1.0));
+            amean[i] += (((TIFFGetA(val)*1.0)-amean[i])/(nfiles*1.0));
+        }
     }
     nfiles++;                   /* processed another file */
     TIFFClose(x);
