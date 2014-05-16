@@ -16,8 +16,10 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <sys/errno.h>
+#include <sys/stat.h>
 
 #include <tiffio.h>
 
@@ -31,10 +33,11 @@ static uint32 www, hhh, len, nfiles;
 static uint32 *current = 0;
 static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
+static FILE *ofile = NULL;
 
 static void
 usage(char *cmd) {
-    fprintf(stderr, "usage: %s file ...\n", cmd);
+    fprintf(stderr, "usage: %s -o outfile infile ...\n", cmd);
     exit(1);
 }
 
@@ -143,12 +146,35 @@ done() {
 
 int
 main(int argc, char *argv[]) {
-    if (argc < 2) {
-        usage(argv[0]);
+    int ch;
+    char *cmd = argv[0];
+    char *oname;
+    struct stat statbuf;
+    
+    while ((ch = getopt(argc, argv, "o:")) != -1) {
+        switch (ch) {
+        case 'o':
+            oname = optarg;
+            if ((stat(oname, &statbuf) != -1) || (errno != ENOENT)) {
+                fprintf(stderr, "file \"%s\" exists, not overwritten\n", oname);
+                exit(1);
+            }
+            ofile = fopen(oname, "w");
+            if (ofile == NULL) {
+                fprintf(stderr, "unable to open \"%s\" for writing: ", oname);
+                perror("fopen");
+                exit(2);
+            }
+        }
+    }
+
+    argc -= optind;
+    argv += optind;
+
+    if ((argc < 1) || (ofile == NULL)) {
+        usage(cmd);
         /*NOTREACHED*/
     }
-    argc--;
-    argv++;
     while (argc > 0) {
         dofile(argv[0]);
         argv++;
