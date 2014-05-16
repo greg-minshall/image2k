@@ -36,7 +36,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 static unsigned int www, hhh, len, nfiles;
 static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
-static FILE *ofile = NULL;
+static char *oname = 0;
 
 static void
 usage(char *cmd) {
@@ -143,9 +143,11 @@ dofile(char *file) {
 static void
 done() {
     int i, r, g, b, a, val;
+    Imlib_Image outimage;
     DATA32 *outdata;
+    Imlib_Load_Error imerr;
 
-    outdata = (DATA32 *)malloc(len);
+    outdata = (DATA32 *)malloc(len*(sizeof (DATA32)));
     if (outdata == NULL) {
         fprintf(stderr, "no room for output buffer\n");
         exit(9);
@@ -157,20 +159,32 @@ done() {
         g = gmean[i];
         b = bmean[i];
         a = amean[i];
-        val |= PutR(r);
-        val |= PutG(g);
-        val |= PutB(b);
-        val |= PutA(a);
-        data[i] = val;
+        val |= PutR(val, r);
+        val |= PutG(val, g);
+        val |= PutB(val, b);
+        val |= PutA(val, a);
+        outdata[i] = val;
     }
-    imlib_create_image_using_data(www, hhh, outdata);
+    outimage = imlib_create_image_using_data(www, hhh, outdata);
+    if (outimage == NULL) {
+        fprintf(stderr, "unable to create output image structures (internal): ");
+        perror("");
+        exit(10);
+    }
+    imlib_context_set_image(outimage);    
+    imlib_save_image_with_error_return(oname, &imerr);
+    if (imerr != IMLIB_LOAD_ERROR_NONE) {
+        fprintf(stderr, "error saving output file \"%s\": ", oname);
+        perror("");
+        exit(10);
+    }
+    imlib_free_image_and_decache();
 }
 
 int
 main(int argc, char *argv[]) {
     int ch;
     char *cmd = argv[0];
-    char *oname;
     struct stat statbuf;
     
     while ((ch = getopt(argc, argv, "o:")) != -1) {
@@ -181,19 +195,13 @@ main(int argc, char *argv[]) {
                 fprintf(stderr, "file \"%s\" exists, not overwritten\n", oname);
                 exit(1);
             }
-            ofile = fopen(oname, "w");
-            if (ofile == NULL) {
-                fprintf(stderr, "unable to open \"%s\" for writing: ", oname);
-                perror("fopen");
-                exit(2);
-            }
         }
     }
 
     argc -= optind;
     argv += optind;
 
-    if ((argc < 1) || (ofile == NULL)) {
+    if ((argc < 1) || (oname == NULL)) {
         usage(cmd);
         /*NOTREACHED*/
     }
@@ -203,4 +211,5 @@ main(int argc, char *argv[]) {
         argc--;
     }
     done();
+    return(0);
 }
