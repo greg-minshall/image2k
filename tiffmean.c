@@ -142,6 +142,15 @@ dofile(char *file) {
 
 static void
 done() {
+    int i, r, g, b, a;
+
+    for (i = 0; i < len; i++) {
+        r = rmean[i];
+        g = gmean[i];
+        b = bmean[i];
+        a = amean[i];
+        fprintf(ofile, "%d, %d, %d, %d, %d\n", i, r, g, b, a);
+    }
 }
 
 int
