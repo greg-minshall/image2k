@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DUMP() fprintf(stderr, "nvals = %d, oavg16 = %d, val = %d, avg32 = %d, rnd(avg32/nvals) = %d(%g), (val-oavg16)/nvals = %d(%g), oavg16+((val-oavg16)/nvals) = %d(%g), accerr = %d, avg16 = %d\n", nvals, oavg16, val, avg32, (avg32+(nvals/2))/nvals, (avg32*1.0)/(nvals*1.0), (val-oavg16)/nvals, ((val*1.0)-(oavg16*1.0))/(nvals*1.0), oavg16+((val-oavg16)/nvals), (oavg16*1.0)+(((val*1.0)-(oavg16*1.0))/(nvals*1.0)), accerr, avg16);
+// #define DUMP() fprintf(stderr, "nvals = %d, oavg16 = %d, val = %d, avg32 = %d, rnd(avg32/nvals) = %d(%g), (val-oavg16)/nvals = %d(%g), oavg16+((val-oavg16)/nvals) = %d(%g), accerr = %d, avg16 = %d\n", nvals, oavg16, val, avg32, (avg32+(nvals/2))/nvals, (avg32*1.0)/(nvals*1.0), (val-oavg16)/nvals, ((val*1.0)-(oavg16*1.0))/(nvals*1.0), oavg16+((val-oavg16)/nvals), (oavg16*1.0)+(((val*1.0)-(oavg16*1.0))/(nvals*1.0)), accerr, avg16);
+
+#define DUMP() fprintf(stderr, "nvals = %d, val = %d, avg32 = %d, rnd(avg32/nvals) = %d(%g), avg16 = %d, favg = %g\n", nvals, val, avg32, (avg32+(nvals/2))/nvals, (avg32*1.0)/(nvals*1.0), avg16, favg);
 
 int
 main() {
     int avg32 = 0, avg16 = 0, nvals = 0, accerr = 0;
-    int val, tmp, oavg16;;
+    int val, tmp, oavg16;
+    float favg = 0.0;
 
     while (scanf(" %x", &val) == 1) {
         nvals++;
@@ -30,8 +33,10 @@ main() {
                     exit(3);
                 }
             }
+            favg += (((val*1.0)-favg)/(nvals*1.0));
         } else {
             avg16 = val&0xffff;
+            favg = val*1.0;
         }
         if (avg16&0x10000) {
             fprintf(stderr, "overflow: ");
