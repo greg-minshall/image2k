@@ -1,4 +1,5 @@
-# $Id:$
+# $Id$
+
 
 COPT = -O2
 CINCLUDES = -I/sw/include -I/usr/X11R6/include
