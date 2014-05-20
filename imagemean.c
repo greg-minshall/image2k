@@ -1,5 +1,5 @@
 /*
- * given a list of input TIFF files, create an output TIFF file in
+ * given a list of input images, create an output image file in
  * which each pixel represents the average the of pixel values of the
  * input files.
  */
@@ -11,6 +11,20 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
  
  * has 143137152 data bytes, which is 5976*3992*6 == 23856192*6, i.e.,
  * there are 2 bytes (16-bits) for each of R, G, and B.
+ */
+
+/*
+ * this produced extracted bits (and one montage: m-10-49.png):
+ *
+ * % for i in `ls ~/Downloads/tmp/sensorproblem/ | sed s/.tif//g`; do     \
+ *       convert -extract 137x158+1000+3800                             \
+ *         ~/Downloads/tmp/sensorproblem/$i.tif clips/$i.png; done
+ * % montage clips/L10001{0,1,2,3,4}?.png x.png
+ *
+ * and, how to use imagemean.c to produce an image containing the
+ * average of each pixel:
+ *
+ * % ./a.out -o 130-139.png ~/Downloads/tmp/sensorproblem/L100013?.tif
  */
 
 #include <stdio.h>
