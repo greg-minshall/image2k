@@ -4,6 +4,8 @@
  * input files.
  */
 
+/* $Id$ */
+
 /*
  * so, an image:
 
