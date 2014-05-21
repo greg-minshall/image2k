@@ -15,9 +15,9 @@ cameras.  it does this by creating an output image file where each
 pixel location in the output image file takes on the average value of
 the same pixel location in each of the image files.
 
-all input files must have the same geometry, e.g., 5996x3994.  this
+all input files must have the same geometry, e.g., 5976x3992.  this
 means that if, e.g., you have rotated an image (so it is now, e.g.,
-3994x5996), imagemean will fail.  the solution is to either exclude
+3992x5976), imagemean will fail.  the solution is to either exclude
 the rotated file from the processing, or to rotate it back to its
 original position.  (if you've rotated a file 180 degrees, it will
 *look* to be the same geometry, but imagemean won't be looking at
