@@ -56,7 +56,7 @@ static char *oname = 0;
 
 static void
 usage(char *cmd) {
-    fprintf(stderr, "usage: %s -o outfile infile ...\n", cmd);
+    fprintf(stderr, "usage: %s -[f]o outfile infile1 [infile2 ...]\n", cmd);
     exit(1);
 }
 
@@ -201,16 +201,17 @@ int
 main(int argc, char *argv[]) {
     int ch;
     char *cmd = argv[0];
+    int force = 0;              /* overwrite file */
     struct stat statbuf;
     
-    while ((ch = getopt(argc, argv, "o:")) != -1) {
+    while ((ch = getopt(argc, argv, "fo:")) != -1) {
         switch (ch) {
         case 'o':
             oname = optarg;
-            if ((stat(oname, &statbuf) != -1) || (errno != ENOENT)) {
-                fprintf(stderr, "file \"%s\" exists, not overwritten\n", oname);
-                exit(1);
-            }
+            break;
+        case 'f':
+            force = 1;
+            break;
         }
     }
 
@@ -220,6 +221,12 @@ main(int argc, char *argv[]) {
     if ((argc < 1) || (oname == NULL)) {
         usage(cmd);
         /*NOTREACHED*/
+    }
+    if ((stat(oname, &statbuf) != -1) || (errno != ENOENT)) {
+        if (!force) {
+            fprintf(stderr, "file \"%s\" exists, not overwritten\n", oname);
+            exit(1);
+        }
     }
     while (argc > 0) {
         dofile(argv[0]);
