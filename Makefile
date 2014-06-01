@@ -17,4 +17,4 @@ imagehist: imagehist.o
 imagehist.o: imagehist.c
 
 clean:
-	rm imagemean.o imagehist.o
+	rm -f imagemean imagemean.o imagehist imagehist.o imagergb imagergb.o
