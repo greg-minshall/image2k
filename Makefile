@@ -6,9 +6,15 @@ CFLAGS = ${COPT} ${CINCLUDES}
 
 LDFLAGS = -L/sw/lib -limlib2 ${CFLAGS}
 
+images: imagemean imagehist
+
 imagemean: imagemean.o
 
 imagemean.o: imagemean.c
 
+imagehist: imagehist.o
+
+imagehist.o: imagehist.c
+
 clean:
-	rm imagemean.o
+	rm imagemean.o imagehist.o
