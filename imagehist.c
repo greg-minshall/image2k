@@ -23,6 +23,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include <sys/errno.h>
 #include <sys/stat.h>
 
+// http://docs.enlightenment.org/api/imlib2/html/
 #include <Imlib2.h>
 
 
