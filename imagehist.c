@@ -1,5 +1,5 @@
 /*
-n * given a list of input images, create a histogram of the red, green,
+ * given a list of input images, create a histogram of the red, green,
  * blue, and (computed) luminance values in the inputs.
  */
 
