@@ -1,2 +1,4 @@
 imagemean.o
 imagemean
+imagehist.o
+imagehist
