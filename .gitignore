@@ -2,3 +2,5 @@ imagemean.o
 imagemean
 imagehist.o
 imagehist
+imagergb.o
+imagergb
