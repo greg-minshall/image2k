@@ -42,14 +42,24 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #define GetB(abgr) (((abgr)>>16)&0xff)
 #define GetA(abgr) (((abgr)>>24)&0xff)
 
+// from netpbm/ppm.h
+#define PPM_LUMINR 0.2989
+#define PPM_LUMING 0.5866
+#define PPM_LUMINB 0.1145
+
+#define PPM_ABGR_TO_LUM(abgr) \
+    ((GetR(abgr)*PPM_LUMINR)+(GetG(abgr)*PPM_LUMING)+(GetB(abgr)*PPM_LUMINB))
+//
+
 static unsigned int www, hhh, len, nfiles;
 static int inited = 0;
 
-static unsigned int avalue = 0;
+static unsigned int avalue = 0; /* output alpha channel */
+static unsigned int lvalue = 0; /* output computed luminance */
 
 static void
 usage(char *cmd) {
-    fprintf(stderr, "usage: %s [-a] infile\n", cmd);
+    fprintf(stderr, "usage: %s [-al] infile\n", cmd);
     exit(1);
 }
 
@@ -87,6 +97,7 @@ dofile(char *file) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val;
+    int r, g, b, a, l;
 
     x  = imlib_load_image_without_cache(file);
     if (x == NULL) {
@@ -106,10 +117,24 @@ dofile(char *file) {
 
     for (i = 0; i < len; i++) {
         val = data[i];
+        r = GetR(val);
+        g = GetG(val);
+        b = GetB(val);
         if (avalue) {
-            printf("%d %d %d %d\n", GetR(val), GetG(val), GetB(val), GetA(val));
+            a = GetA(val);
+            if (lvalue) {
+                l = PPM_ABGR_TO_LUM(val);
+                printf("%d %d %d %d %d\n", r, g, b, a, l);
+            } else {
+                printf("%d %d %d %d\n", r, g, b, a);
+            }
         } else {
-            printf("%d %d %d\n", GetR(val), GetG(val), GetB(val));
+            if (lvalue) {
+                l = PPM_ABGR_TO_LUM(val);
+                printf("%d %d %d %d\n", r, g, b, l);
+            } else {
+                printf("%d %d %d\n", r, g, b);
+            }
         }
     }
     nfiles++;                   /* processed another file */
@@ -127,10 +152,13 @@ main(int argc, char *argv[]) {
     int force = 0;              /* overwrite file */
     struct stat statbuf;
     
-    while ((ch = getopt(argc, argv, "a")) != -1) {
+    while ((ch = getopt(argc, argv, "al")) != -1) {
         switch (ch) {
         case 'a':
             avalue = 1;
+            break;
+        case 'l':
+            lvalue = 1;
             break;
         default:
             usage(cmd);
