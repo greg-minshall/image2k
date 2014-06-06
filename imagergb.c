@@ -55,6 +55,7 @@ static unsigned int www, hhh, len, nfiles;
 static int inited = 0;
 
 static unsigned int avalue = 0; /* output alpha channel */
+static unsigned int cvalue = 0; /* output x and y coordinates (as first two columns)  */
 static unsigned int lvalue = 0; /* output computed luminance */
 
 static void
@@ -94,18 +95,18 @@ chkcompat(char *file) {
 
 static void
 dofile(char *file) {
-    Imlib_Image x;              /* imlib2 context */
+    Imlib_Image image;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val;
-    int r, g, b, a, l;
+    int r, g, b, a, l, x, y;
 
-    x  = imlib_load_image_without_cache(file);
-    if (x == NULL) {
+    image  = imlib_load_image_without_cache(file);
+    if (image == NULL) {
         fprintf(stderr, "unable to open \"%s\": %s\n", file, strerror(errno));
         exit(7);
         /*NOTREACHED*/
     }
-    imlib_context_set_image(x);
+    imlib_context_set_image(image);
 
     if (!inited) {
         init();
@@ -116,26 +117,25 @@ dofile(char *file) {
     data = imlib_image_get_data_for_reading_only();
 
     for (i = 0; i < len; i++) {
+        if (cvalue) {           /* print out x and y coordinates */
+            y = i/www;
+            x = i-(y*www);
+            printf("%d %d ", x, y);
+        }
         val = data[i];
         r = GetR(val);
         g = GetG(val);
         b = GetB(val);
-        if (avalue) {
+        printf("%d %d %d", r, g, b);
+        if (avalue) {           /* print out alpha value */
             a = GetA(val);
-            if (lvalue) {
-                l = PPM_ABGR_TO_LUM(val);
-                printf("%d %d %d %d %d\n", r, g, b, a, l);
-            } else {
-                printf("%d %d %d %d\n", r, g, b, a);
-            }
-        } else {
-            if (lvalue) {
-                l = PPM_ABGR_TO_LUM(val);
-                printf("%d %d %d %d\n", r, g, b, l);
-            } else {
-                printf("%d %d %d\n", r, g, b);
-            }
+            printf(" %d", a);
         }
+        if (lvalue) {           /* (compute and) print out luminance value */
+            l = PPM_ABGR_TO_LUM(val);
+            printf(" %d", l);
+        }
+        printf("\n");
     }
     nfiles++;                   /* processed another file */
     imlib_free_image_and_decache();
@@ -152,10 +152,13 @@ main(int argc, char *argv[]) {
     int force = 0;              /* overwrite file */
     struct stat statbuf;
     
-    while ((ch = getopt(argc, argv, "al")) != -1) {
+    while ((ch = getopt(argc, argv, "acl")) != -1) {
         switch (ch) {
         case 'a':
             avalue = 1;
+            break;
+        case 'c':
+            cvalue = 1;
             break;
         case 'l':
             lvalue = 1;
