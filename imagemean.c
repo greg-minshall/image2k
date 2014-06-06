@@ -212,7 +212,6 @@ main(int argc, char *argv[]) {
         case 'f':
             force = 1;
             break;
-        }
         default:
             usage(cmd);
             /*NOTREACHED*/
