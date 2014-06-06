@@ -213,6 +213,10 @@ main(int argc, char *argv[]) {
             force = 1;
             break;
         }
+        default:
+            usage(cmd);
+            /*NOTREACHED*/
+        }
     }
 
     argc -= optind;
