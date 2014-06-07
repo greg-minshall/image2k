@@ -39,15 +39,8 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include <Imlib2.h>
 
-#define GetR(abgr) (((abgr)    )&0xff)
-#define GetG(abgr) (((abgr)>> 8)&0xff)
-#define GetB(abgr) (((abgr)>>16)&0xff)
-#define GetA(abgr) (((abgr)>>24)&0xff)
+#include "image.h"
 
-#define PutR(abgr, r) (((abgr)&0xffffff00) | (((r)    )&0x000000ff))
-#define PutG(abgr, g) (((abgr)&0xffff00ff) | (((g)<< 8)&0x0000ff00))
-#define PutB(abgr, b) (((abgr)&0xff00ffff) | (((b)<<16)&0x00ff0000))
-#define PutA(abgr, a) (((abgr)&0x00ffffff) | (((a)<<24)&0xff000000))
 
 static unsigned int www, hhh, len, nfiles;
 static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;

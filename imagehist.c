@@ -26,21 +26,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 // http://docs.enlightenment.org/api/imlib2/html/
 #include <Imlib2.h>
 
-
-#define GetR(abgr) (((abgr)    )&0xff)
-#define GetG(abgr) (((abgr)>> 8)&0xff)
-#define GetB(abgr) (((abgr)>>16)&0xff)
-#define GetA(abgr) (((abgr)>>24)&0xff)
-
-// from netpbm/ppm.h
-#define PPM_LUMINR 0.2989
-#define PPM_LUMING 0.5866
-#define PPM_LUMINB 0.1145
-
-#define PPM_ABGR_TO_LUM(abgr) \
-    ((GetR(abgr)*PPM_LUMINR)+(GetG(abgr)*PPM_LUMING)+(GetB(abgr)*PPM_LUMINB))
-
-#define IMAGE_NVALS 256         /* number of possible values in an image */
+#include "image.h"
 
 
 static unsigned int www, hhh, len, nfiles, arraysize;
