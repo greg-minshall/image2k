@@ -121,7 +121,7 @@ dofile(char *file) {
         r = GetR(val);
         g = GetG(val);
         b = GetB(val);
-        l = PPM_ABGR_TO_LUM(val);
+        l = PPM_ARGB_TO_LUM(val);
         rhist[r]++;
         ghist[g]++;
         bhist[b]++;

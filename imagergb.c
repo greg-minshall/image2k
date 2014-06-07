@@ -120,7 +120,7 @@ dofile(char *file) {
             printf(" %d", a);
         }
         if (lvalue) {           /* (compute and) print out luminance value */
-            l = PPM_ABGR_TO_LUM(val);
+            l = PPM_ARGB_TO_LUM(val);
             printf(" %d", l);
         }
         printf("\n");

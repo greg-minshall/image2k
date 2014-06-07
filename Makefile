@@ -10,11 +10,11 @@ images: imagemean imagehist imagergb
 
 imagemean: imagemean.o
 
-imagemean.o: imagemean.c
+imagemean.o: imagemean.c image.h
 
-imagehist: imagehist.o
+imagehist: imagehist.o image.h
 
-imagehist.o: imagehist.c
+imagehist.o: imagehist.c image.h
 
 clean:
 	rm -f imagemean imagemean.o imagehist imagehist.o imagergb imagergb.o
