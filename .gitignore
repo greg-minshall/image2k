@@ -4,3 +4,4 @@ imagehist.o
 imagehist
 imagergb.o
 imagergb
+imagesubr.o
