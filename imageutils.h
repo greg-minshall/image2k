@@ -36,4 +36,6 @@ channel - so a pixel's bits are ARGB (from most to least significant,
 
 #define IMAGE_NVALS 256         /* number of possible values in an image */
 
+char *image_decode_load_error(Imlib_Load_Error error);
+
 #endif /* ndef __image_h__ */

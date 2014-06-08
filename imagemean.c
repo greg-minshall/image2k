@@ -39,7 +39,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include <Imlib2.h>
 
-#include "image.h"
+#include "imageutils.h"
 
 
 static unsigned int www, hhh, len, nfiles;
@@ -113,7 +113,10 @@ dofile(char *file) {
 
     x  = imlib_load_image_without_cache(file);
     if (x == NULL) {
-        fprintf(stderr, "unable to open \"%s\": %s\n", file, strerror(errno));
+        Imlib_Load_Error error_return;
+        x = imlib_load_image_with_error_return(file, &error_return);
+        fprintf(stderr, "unable to open \"%s\": %s\n",
+                file, image_decode_load_error(error_return));
         exit(7);
         /*NOTREACHED*/
     }

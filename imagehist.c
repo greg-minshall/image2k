@@ -26,7 +26,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 // http://docs.enlightenment.org/api/imlib2/html/
 #include <Imlib2.h>
 
-#include "image.h"
+#include "imageutils.h"
 
 
 static unsigned int www, hhh, len, nfiles, arraysize;
@@ -95,14 +95,16 @@ chkcompat(char *file) {
 static void
 dofile(char *file) {
     Imlib_Image x;              /* imlib2 context */
+    Imlib_Load_Error error_return;
     DATA32 *data;               /* actual image data */
     int i;
     unsigned int val;
     unsigned int r, g, b, l;
 
-    x  = imlib_load_image_without_cache(file);
+    x = imlib_load_image_with_error_return(file, &error_return);
     if (x == NULL) {
-        fprintf(stderr, "unable to open \"%s\": %s\n", file, strerror(errno));
+        fprintf(stderr, "unable to open \"%s\": %s\n",
+                file, image_decode_load_error(error_return));
         exit(7);
         /*NOTREACHED*/
     }
