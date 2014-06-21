@@ -12,6 +12,8 @@ PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], ["Have Imli
 AC_SUBST(IMLIB2_CFLAGS)
 AC_SUBST(IMLIB2_LIBS)
 
+# this ImageMagick stuff is for some future, mythical time when i will
+# modify the programs to use both libraries.
 PKG_CHECK_MODULES([IMAGEMAGICK], [ImageMagick], [AC_DEFINE([HAVE_IMAGEMAGICK], [1], ["Have Imagemagick"])])
 AC_SUBST(IMAGEMAGICK_CFLAGS)
 AC_SUBST(IMAGEMAGICK_LIBS)
