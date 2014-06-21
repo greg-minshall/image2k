@@ -60,6 +60,11 @@ static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
 static char *oname = 0;
 
+/* used for negotiating between Imlib2 and ImageMagick. */
+typedef void (*dofilefcn)(char *file);
+typedef void (*donefcn)(void);
+
+
 static void
 usage(char *cmd) {
     fprintf(stderr, "usage: %s -[f]o outfile infile1 [infile2 ...]\n", cmd);
@@ -138,8 +143,13 @@ addpixel(int i, float red, float green, float blue, float alpha) {
 }
 
 
+
+#ifdef HAVE_IMLIB2
+/*
+ * process a file with imlib2
+ */
 static void
-im2dofile(char *file) {
+dofile2(char *file) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h;
@@ -173,8 +183,12 @@ im2dofile(char *file) {
     imlib_free_image_and_decache();
 }
 
+
+/*
+ * finish processing with imlib2
+ */
 static void
-im2done() {
+done2(void) {
     int i, r, g, b, a, val;
     Imlib_Image outimage;
     DATA32 *outdata;
@@ -213,6 +227,8 @@ im2done() {
     }
     imlib_free_image_and_decache();
 }
+#endif /* def HAVE_IMLIB2 */
+
 
 int
 main(int argc, char *argv[]) {
@@ -220,7 +236,9 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    
+    dofilefcn dofile = dofile2;
+    donefcn done = done2;
+
     while ((ch = getopt(argc, argv, "fo:")) != -1) {
         switch (ch) {
         case 'o':
@@ -238,6 +256,14 @@ main(int argc, char *argv[]) {
     argc -= optind;
     argv += optind;
 
+    /* now, arbitrate between Imlib2 and ImageMagick */
+#if defined(HAVE_IMLIB2)
+#elif defined(HAVE_IMAGEMAGICK2)
+#else /* if defined(HAVE_IMAGEMAGICK2) */
+// this should not occur!
+#error Need Imlib2 or ImageMagick -- neither defined at compilation time
+#endif /* defined(HAVE_IMLIB2) */
+
     if ((argc < 1) || (oname == NULL)) {
         usage(cmd);
         /*NOTREACHED*/
@@ -249,11 +275,13 @@ main(int argc, char *argv[]) {
         }
     }
     while (argc > 0) {
-        im2dofile(argv[0]);
+        (*dofile)(argv[0]);
         argv++;
         argc--;
         nfiles++;
     }
-    im2done();
+#ifdef HAVE_IMLIB2
+    (*done)();
+#endif /* def HAVE_IMLIB2 */
     return(0);
 }
