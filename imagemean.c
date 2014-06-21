@@ -248,6 +248,7 @@ main(int argc, char *argv[]) {
 #else /* defined(HAVE_IMLIB2) */
             fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
             usage(cmd);
+            /*NOTREACHED*/
 #endif /* defined(HAVE_IMLIB2) */
             break;
         case 'f':
@@ -259,6 +260,7 @@ main(int argc, char *argv[]) {
 #else /* defined(HAVE_IMAGEMAGICK) */
             fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
             usage(cmd);
+            /*NOTREACHED*/
 #endif /* defined(HAVE_IMAGEMAGICK) */
             break;
         case 'o':
