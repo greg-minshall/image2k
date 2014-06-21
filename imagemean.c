@@ -61,13 +61,13 @@ static int inited = 0;
 static char *oname = 0;
 
 /* used for negotiating between Imlib2 and ImageMagick. */
-typedef void (*dofilefcn)(char *file);
-typedef void (*donefcn)(void);
+typedef void (*dofile_t)(char *file);
+typedef void (*done_t)(void);
 
 
 static void
 usage(char *cmd) {
-    fprintf(stderr, "usage: %s -[2fk]o outfile infile1 [infile2 ...]\n", cmd);
+    fprintf(stderr, "usage: %s [-2|-k] -[f]o outfile infile1 [infile2 ...]\n", cmd);
     exit(1);
 }
 
@@ -229,6 +229,16 @@ done2(void) {
 }
 #endif /* def HAVE_IMLIB2 */
 
+#if defined(HAVE_IMAGEMAGICK)
+static void
+dofilek(char *file) {
+}
+
+static void
+donek() {
+}
+#endif /* defined(HAVE_IMAGEMAGICK) */
+
 
 int
 main(int argc, char *argv[]) {
@@ -236,8 +246,8 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    dofilefcn dofile = dofile2;
-    donefcn done = done2;
+    dofile_t dofile = dofile2;
+    done_t done = done2;
     int flag2 = 0, flagk = 0;
 
     while ((ch = getopt(argc, argv, "2fko:")) != -1) {
@@ -272,16 +282,34 @@ main(int argc, char *argv[]) {
         }
     }
 
+    if (flag2 && flagk) {
+        fprintf(stderr, "%s: can't specify both -2 and -k\n", cmd);
+        usage(cmd);
+        /*NOTREACHED*/
+    }
+
     argc -= optind;
     argv += optind;
 
     /* now, arbitrate between Imlib2 and ImageMagick */
-#if defined(HAVE_IMLIB2)
-#elif defined(HAVE_IMAGEMAGICK2)
-#else /* if defined(HAVE_IMAGEMAGICK2) */
+#if defined(HAVE_IMLIB2) && defined(HAVE_IMAGEMAGICK)
+    if (flagk) {
+        dofile = dofilek;
+        done = donek;
+    } else {
+        dofile = dofile2;
+        done = done2;
+    }
+#elif defined(HAVE_IMLIB2)
+    dofile = dofile2;
+    done = done2;
+#elif defined(HAVE_IMAGEMAGICK)
+    dofile = dofilek;
+    done = donek;
+#else
 // this should not occur!
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
-#endif /* defined(HAVE_IMLIB2) */
+#endif /* defined(HAVE_IMLIB2) && defined(HAVE_IMAGEMAGICK) */
 
     if ((argc < 1) || (oname == NULL)) {
         usage(cmd);
