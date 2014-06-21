@@ -67,7 +67,7 @@ typedef void (*donefcn)(void);
 
 static void
 usage(char *cmd) {
-    fprintf(stderr, "usage: %s -[f]o outfile infile1 [infile2 ...]\n", cmd);
+    fprintf(stderr, "usage: %s -[2fk]o outfile infile1 [infile2 ...]\n", cmd);
     exit(1);
 }
 
@@ -238,14 +238,31 @@ main(int argc, char *argv[]) {
     struct stat statbuf;
     dofilefcn dofile = dofile2;
     donefcn done = done2;
+    int flag2 = 0, flagk = 0;
 
-    while ((ch = getopt(argc, argv, "fo:")) != -1) {
+    while ((ch = getopt(argc, argv, "2fko:")) != -1) {
         switch (ch) {
-        case 'o':
-            oname = optarg;
+        case '2':               /* use Imlib2 */
+#if defined(HAVE_IMLIB2)
+            flag2 = 1;
+#else /* defined(HAVE_IMLIB2) */
+            fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
+            usage(cmd);
+#endif /* defined(HAVE_IMLIB2) */
             break;
         case 'f':
             force = 1;
+            break;
+        case 'k':               /* use ImageMagick */
+#if defined(HAVE_IMAGEMAGICK)
+            flagk = 1;
+#else /* defined(HAVE_IMAGEMAGICK) */
+            fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
+            usage(cmd);
+#endif /* defined(HAVE_IMAGEMAGICK) */
+            break;
+        case 'o':
+            oname = optarg;
             break;
         default:
             usage(cmd);
