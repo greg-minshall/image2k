@@ -29,6 +29,11 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
  * % ./a.out -o 130-139.png ~/Downloads/tmp/sensorproblem/L100013?.tif
  */
 
+/*
+ * the ImageMagick bits are mostly copied from the sample program
+ * here: http://www.imagemagick.org/script/magick-wand.php
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +42,15 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include <sys/errno.h>
 #include <sys/stat.h>
 
+#include "config.h"
+
+#ifdef HAVE_IMLIB2
 #include <Imlib2.h>
+#endif /* def HAVE_IMLIB2 */
+
+#ifdef HAVE_IMAGEMAGICK
+#include <wand/MagickWand.h>
+#endif /* def HAVE_IMAGEMAGICK */
 
 #include "imageutils.h"
 
@@ -58,6 +71,7 @@ endian(int byte0, int byte1) {
     return (byte1*0x100)+byte0; /* XXX little endian */
 }
 
+
 /*
  * we've calculated the running average CUR of N samples, and now
  * compute the running average taking into account the sample NEW.
@@ -68,14 +82,15 @@ ravg(int n, unsigned int cur, unsigned int new)
     return cur+((new-cur)/n);
 }
 
+
 /*
  * initialize data structures
  */
 
 static void
-init(void) {
-    www = imlib_image_get_width();
-    hhh = imlib_image_get_height();
+init(unsigned int height, unsigned int width) {
+    hhh = height;
+    www = width;
     len = www*hhh;
     rmean = (float*) malloc(len*sizeof(float));
     gmean = (float*) malloc(len*sizeof(float));
@@ -91,11 +106,11 @@ init(void) {
 }
 
 static void
-chkcompat(char *file) {
+chkcompat(char *file, unsigned int height, unsigned int width) {
     unsigned int w, h;
 
-    w = imlib_image_get_width();
-    h = imlib_image_get_height();
+    h = height;
+    w = width;
 
     if ((w != www) || (h != hhh)) {
         fprintf(stderr, "incompatible file \"%s\": (%d, %d) != (%d, %d)\n",
@@ -105,11 +120,29 @@ chkcompat(char *file) {
     }
 }
 
+
 static void
-dofile(char *file) {
+addpixel(int i, float red, float green, float blue, float alpha) {
+    if (nfiles == 0) {          /* this is the first value */
+        rmean[i] = red;
+        gmean[i] = green;
+        bmean[i] = blue;
+        amean[i] = alpha;
+    } else {
+        /* process image data */
+        rmean[i] += ((red-rmean[i])/(nfiles*1.0));
+        gmean[i] += ((green-gmean[i])/(nfiles*1.0));
+        bmean[i] += ((blue-bmean[i])/(nfiles*1.0));
+        amean[i] += ((alpha-amean[i])/(nfiles*1.0));
+    }
+}
+
+
+static void
+im2dofile(char *file) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
-    int i, val;
+    int i, val, w, h;
 
     x  = imlib_load_image_without_cache(file);
     if (x == NULL) {
@@ -122,38 +155,26 @@ dofile(char *file) {
     }
     imlib_context_set_image(x);
 
+    w = imlib_image_get_width();
+    h = imlib_image_get_height();
+
     if (!inited) {
-        init();
+        init(h, w);
     } else {
-        chkcompat(file);
+        chkcompat(file, h, w);
     }
 
     data = imlib_image_get_data_for_reading_only();
 
-    if (nfiles == 0) {          /* if this is first file */
-        for (i = 0; i < len; i++) {
-            val = data[i];
-            rmean[i] = GetR(val)*1.0;
-            gmean[i] = GetG(val)*1.0;
-            bmean[i] = GetB(val)*1.0;
-            amean[i] = GetA(val)*1.0;
-        }
-    } else {                    /* else, read into current and process */
-        for (i = 0; i < len; i++) {
-            /* process image data */
-            val = data[i];
-            rmean[i] += (((GetR(val)*1.0)-rmean[i])/(nfiles*1.0));
-            gmean[i] += (((GetG(val)*1.0)-gmean[i])/(nfiles*1.0));
-            bmean[i] += (((GetB(val)*1.0)-bmean[i])/(nfiles*1.0));
-            amean[i] += (((GetA(val)*1.0)-amean[i])/(nfiles*1.0));
-        }
+    for (i = 0; i < len; i++) {
+        val = data[i];
+        addpixel(i, GetR(val)*1.0, GetG(val)*1.0, GetB(val)*1.0, GetA(val)*1.0);
     }
-    nfiles++;                   /* processed another file */
     imlib_free_image_and_decache();
 }
 
 static void
-done() {
+im2done() {
     int i, r, g, b, a, val;
     Imlib_Image outimage;
     DATA32 *outdata;
@@ -228,10 +249,11 @@ main(int argc, char *argv[]) {
         }
     }
     while (argc > 0) {
-        dofile(argv[0]);
+        im2dofile(argv[0]);
         argv++;
         argc--;
+        nfiles++;
     }
-    done();
+    im2done();
     return(0);
 }
