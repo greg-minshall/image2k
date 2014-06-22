@@ -227,6 +227,18 @@ done2(void) {
 
 #if defined(HAVE_IMAGEMAGICK)
 
+static void
+ThrowWandException(MagickWand *wand) {
+    char *description;
+
+    ExceptionType severity;
+
+    description=MagickGetException(wand,&severity);
+    (void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description);
+    description=(char *) MagickRelinquishMemory(description);
+    exit(-1);
+            }
+
 /*
  * the ImageMagick bits are mostly copied from the sample program
  * here:
@@ -236,21 +248,6 @@ done2(void) {
 static void
 dofilek(char *file) {
 {
-#define SigmoidalContrast(x)                                            \
-        (QuantumRange*(1.0/(1+exp(10.0*(0.5-QuantumScale*x)))-0.0066928509)*1.0092503)
-#define ThrowWandException(wand)                \
-    { \
-        char \
-            *description; \
-        \
-        ExceptionType \
-            severity; \
-        \
-        description=MagickGetException(wand,&severity); \
-        (void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description); \
-        description=(char *) MagickRelinquishMemory(description); \
-        exit(-1); \
-    }
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -264,37 +261,40 @@ dofilek(char *file) {
     MagickWandGenesis();
     image_wand=NewMagickWand();
     status=MagickReadImage(image_wand, file);
-    if (status == MagickFalse)
+    if (status == MagickFalse) {
         ThrowWandException(image_wand);
-    contrast_wand=CloneMagickWand(image_wand);
+    }
+    contrast_wand = CloneMagickWand(image_wand);
     /* Sigmoidal non-linearity contrast control. */
-    iterator=NewPixelIterator(image_wand);
-    contrast_iterator=NewPixelIterator(contrast_wand);
+    iterator = NewPixelIterator(image_wand);
+    contrast_iterator = NewPixelIterator(contrast_wand);
     if ((iterator == (PixelIterator *) NULL) ||
-        (contrast_iterator == (PixelIterator *) NULL))
+        (contrast_iterator == (PixelIterator *) NULL)) {
         ThrowWandException(image_wand);
+    }
     for (y=0; y < (long) MagickGetImageHeight(image_wand); y++) {
-        pixels=PixelGetNextIteratorRow(iterator,&width);
-        contrast_pixels=PixelGetNextIteratorRow(contrast_iterator,&width);
+        pixels = PixelGetNextIteratorRow(iterator,&width);
+        contrast_pixels = PixelGetNextIteratorRow(contrast_iterator,&width);
         if ((pixels == (PixelWand **) NULL) ||
             (contrast_pixels == (PixelWand **) NULL))
             break;
         for (x=0; x < (long) width; x++) {
             PixelGetMagickColor(pixels[x],&pixel);
-            pixel.red=SigmoidalContrast(pixel.red);
-            pixel.green=SigmoidalContrast(pixel.green);
-            pixel.blue=SigmoidalContrast(pixel.blue);
-            pixel.index=SigmoidalContrast(pixel.index);
+            pixel.red = SigmoidalContrast(pixel.red);
+            pixel.green = SigmoidalContrast(pixel.green);
+            pixel.blue = SigmoidalContrast(pixel.blue);
+            pixel.index = SigmoidalContrast(pixel.index);
             PixelSetMagickColor(contrast_pixels[x],&pixel);
         }
         (void) PixelSyncIterator(contrast_iterator);
     }
-    if (y < (long) MagickGetImageHeight(image_wand))
+    if (y < (long) MagickGetImageHeight(image_wand)) {
         ThrowWandException(image_wand);
-    contrast_iterator=DestroyPixelIterator(contrast_iterator);
-    iterator=DestroyPixelIterator(iterator);
-    image_wand=DestroyMagickWand(image_wand);
-        }}
+    }
+    contrast_iterator = DestroyPixelIterator(contrast_iterator);
+    iterator = DestroyPixelIterator(iterator);
+    image_wand = DestroyMagickWand(image_wand);
+}
 
 static void
 donek() {
