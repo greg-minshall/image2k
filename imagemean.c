@@ -255,7 +255,7 @@ dofilek(char *file) {
     PixelWand **pixels;
     register long x;
     unsigned long width;
-    int i = 0;
+    int i = 0, h, w;
 
     /* Read an image. */
     MagickWandGenesis();
@@ -264,7 +264,13 @@ dofilek(char *file) {
     if (status == MagickFalse) {
         ThrowWandException(image_wand);
     }
-    /* Sigmoidal non-linearity contrast control. */
+    h = MagickGetImageHeight(image_wand);
+    w = MagickGetImageWidth(image_wand);
+    if (!inited) {
+        init(h, w);
+    } else {
+        chkcompat(file, h, w);
+    }
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {
         ThrowWandException(image_wand);
