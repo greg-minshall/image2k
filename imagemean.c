@@ -275,7 +275,7 @@ dofilek(char *file) {
     if (iterator == (PixelIterator *) NULL) {
         ThrowWandException(image_wand);
     }
-    for (y=0; y < (long) MagickGetImageHeight(image_wand); y++) {
+    for (y=0; y < h; y++) {
         pixels = PixelGetNextIteratorRow(iterator,&width);
         if (pixels == (PixelWand **) NULL) {
             break;
