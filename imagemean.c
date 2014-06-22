@@ -44,9 +44,9 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include <Imlib2.h>
 #endif /* def HAVE_IMLIB2 */
 
-#ifdef HAVE_IMAGEMAGICK
+#ifdef HAVE_MAGICKWAND
 #include <wand/MagickWand.h>
-#endif /* def HAVE_IMAGEMAGICK */
+#endif /* def HAVE_MAGICKWAND */
 
 #include "imageutils.h"
 
@@ -225,7 +225,7 @@ done2(void) {
 }
 #endif /* def HAVE_IMLIB2 */
 
-#if defined(HAVE_IMAGEMAGICK)
+#if defined(HAVE_MAGICKWAND)
 
 static void
 ThrowWandException(MagickWand *wand) {
@@ -300,7 +300,7 @@ donek() {
     MagickWandTerminus();
 #endif
 }
-#endif /* defined(HAVE_IMAGEMAGICK) */
+#endif /* defined(HAVE_MAGICKWAND) */
 
 
 int
@@ -328,13 +328,13 @@ main(int argc, char *argv[]) {
             force = 1;
             break;
         case 'k':               /* use ImageMagick */
-#if defined(HAVE_IMAGEMAGICK)
+#if defined(HAVE_MAGICKWAND)
             flagk = 1;
-#else /* defined(HAVE_IMAGEMAGICK) */
+#else /* defined(HAVE_MAGICKWAND) */
             fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
             usage(cmd);
             /*NOTREACHED*/
-#endif /* defined(HAVE_IMAGEMAGICK) */
+#endif /* defined(HAVE_MAGICKWAND) */
             break;
         case 'o':
             oname = optarg;
@@ -355,7 +355,7 @@ main(int argc, char *argv[]) {
     argv += optind;
 
     /* now, arbitrate between Imlib2 and ImageMagick */
-#if defined(HAVE_IMLIB2) && defined(HAVE_IMAGEMAGICK)
+#if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
     if (flagk) {
         dofile = dofilek;
         done = donek;
@@ -366,13 +366,13 @@ main(int argc, char *argv[]) {
 #elif defined(HAVE_IMLIB2)
     dofile = dofile2;
     done = done2;
-#elif defined(HAVE_IMAGEMAGICK)
+#elif defined(HAVE_MAGICKWAND)
     dofile = dofilek;
     done = donek;
 #else
 // this should not occur!
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
-#endif /* defined(HAVE_IMLIB2) && defined(HAVE_IMAGEMAGICK) */
+#endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
 
     if ((argc < 1) || (oname == NULL)) {
         usage(cmd);
