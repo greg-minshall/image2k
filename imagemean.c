@@ -236,8 +236,9 @@ done2(void) {
 static void
 dofilek(char *file) {
 {
-#define QuantumScale ((MagickRealType) 1.0/(MagickRealType) QuantumRange) #define SigmoidalContrast(x) \
-        (QuantumRange*(1.0/(1+exp(10.0*(0.5-QuantumScale*x)))-0.0066928509)*1.0092503) #define ThrowWandException(wand) \
+#define SigmoidalContrast(x)                                            \
+        (QuantumRange*(1.0/(1+exp(10.0*(0.5-QuantumScale*x)))-0.0066928509)*1.0092503)
+#define ThrowWandException(wand)                \
     { \
         char \
             *description; \
@@ -259,15 +260,10 @@ dofilek(char *file) {
     register long x;
     unsigned long width;
 
-    if (argc != 3) {
-        (void) fprintf(stdout,"Usage: %s image sigmoidal-image\n",argv[0]);
-        exit(0);
-    }
-
     /* Read an image. */
     MagickWandGenesis();
     image_wand=NewMagickWand();
-    status=MagickReadImage(image_wand,argv[1]);
+    status=MagickReadImage(image_wand, file);
     if (status == MagickFalse)
         ThrowWandException(image_wand);
     contrast_wand=CloneMagickWand(image_wand);
@@ -298,6 +294,10 @@ dofilek(char *file) {
     contrast_iterator=DestroyPixelIterator(contrast_iterator);
     iterator=DestroyPixelIterator(iterator);
     image_wand=DestroyMagickWand(image_wand);
+        }}
+
+static void
+donek() {
     /* Write the image then destroy it. */
     status=MagickWriteImages(contrast_wand,argv[2],MagickTrue);
     if (status == MagickFalse)
@@ -305,10 +305,6 @@ dofilek(char *file) {
     contrast_wand=DestroyMagickWand(contrast_wand);
     MagickWandTerminus();
     return(0); }
-}
-
-static void
-donek() {
 }
 #endif /* defined(HAVE_IMAGEMAGICK) */
 
