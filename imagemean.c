@@ -247,64 +247,58 @@ ThrowWandException(MagickWand *wand) {
 
 static void
 dofilek(char *file) {
-{
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
-    MagickWand *contrast_wand, *image_wand;
-    PixelIterator *contrast_iterator, *iterator;
-    PixelWand **contrast_pixels, **pixels;
+    MagickWand *image_wand;
+    PixelIterator *iterator;
+    PixelWand **pixels;
     register long x;
     unsigned long width;
+    int i = 0;
 
     /* Read an image. */
     MagickWandGenesis();
-    image_wand=NewMagickWand();
-    status=MagickReadImage(image_wand, file);
+    image_wand = NewMagickWand();
+    status = MagickReadImage(image_wand, file);
     if (status == MagickFalse) {
         ThrowWandException(image_wand);
     }
-    contrast_wand = CloneMagickWand(image_wand);
     /* Sigmoidal non-linearity contrast control. */
     iterator = NewPixelIterator(image_wand);
-    contrast_iterator = NewPixelIterator(contrast_wand);
-    if ((iterator == (PixelIterator *) NULL) ||
-        (contrast_iterator == (PixelIterator *) NULL)) {
+    if (iterator == (PixelIterator *) NULL) {
         ThrowWandException(image_wand);
     }
     for (y=0; y < (long) MagickGetImageHeight(image_wand); y++) {
         pixels = PixelGetNextIteratorRow(iterator,&width);
-        contrast_pixels = PixelGetNextIteratorRow(contrast_iterator,&width);
-        if ((pixels == (PixelWand **) NULL) ||
-            (contrast_pixels == (PixelWand **) NULL))
+        if (pixels == (PixelWand **) NULL) {
             break;
+        }
         for (x=0; x < (long) width; x++) {
             PixelGetMagickColor(pixels[x],&pixel);
-            pixel.red = SigmoidalContrast(pixel.red);
-            pixel.green = SigmoidalContrast(pixel.green);
-            pixel.blue = SigmoidalContrast(pixel.blue);
-            pixel.index = SigmoidalContrast(pixel.index);
-            PixelSetMagickColor(contrast_pixels[x],&pixel);
+            addpixel(i, pixel.red, pixel.green, pixel.blue,
+                     PixelGetOpacity(*pixels));
+            i++;
         }
-        (void) PixelSyncIterator(contrast_iterator);
     }
     if (y < (long) MagickGetImageHeight(image_wand)) {
         ThrowWandException(image_wand);
     }
-    contrast_iterator = DestroyPixelIterator(contrast_iterator);
     iterator = DestroyPixelIterator(iterator);
     image_wand = DestroyMagickWand(image_wand);
 }
 
 static void
 donek() {
+#if 0
     /* Write the image then destroy it. */
     status=MagickWriteImages(contrast_wand,argv[2],MagickTrue);
-    if (status == MagickFalse)
+    if (status == MagickFalse) {
         ThrowWandException(image_wand);
+    }
     contrast_wand=DestroyMagickWand(contrast_wand);
     MagickWandTerminus();
-    return(0); }
+#endif
 }
 #endif /* defined(HAVE_IMAGEMAGICK) */
 
