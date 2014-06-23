@@ -124,6 +124,7 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 
 static void
 addpixel(int i, float red, float green, float blue, float alpha) {
+    fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
     if (nfiles == 0) {          /* this is the first value */
         rmean[i] = red;
         gmean[i] = green;
@@ -281,9 +282,12 @@ dofilek(char *file) {
             break;
         }
         for (x=0; x < (long) width; x++) {
-            PixelGetMagickColor(pixels[x],&pixel);
-            addpixel(i, pixel.red, pixel.green, pixel.blue,
-                     PixelGetOpacity(*pixels));
+            // PixelGet* returns in range [0,1); we like [0..255]
+            addpixel(i,
+                     PixelGetRed(pixels[x])*255,
+                     PixelGetGreen(pixels[x])*255,
+                     PixelGetBlue(pixels[x])*255,
+                     PixelGetAlpha(pixels[x])*255);
             i++;
         }
     }
@@ -296,6 +300,7 @@ dofilek(char *file) {
 
 static void
 donek() {
+    done2();
 #if 0
     /* Write the image then destroy it. */
     status=MagickWriteImages(contrast_wand,argv[2],MagickTrue);
