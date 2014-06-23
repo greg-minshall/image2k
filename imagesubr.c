@@ -13,6 +13,8 @@
 
 #if defined(HAVE_IMLIB2)
 
+// http://docs.enlightenment.org/api/imlib2/html/
+
 /*
  * return a string "explainig" the reason a load_image (or save_image)
  * failed.
