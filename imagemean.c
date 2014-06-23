@@ -124,7 +124,9 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 
 static void
 addpixel(int i, float red, float green, float blue, float alpha) {
+#if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
+#endif /* 0 */
     if (nfiles == 0) {          /* this is the first value */
         rmean[i] = red;
         gmean[i] = green;
@@ -298,18 +300,45 @@ dofilek(char *file) {
     image_wand = DestroyMagickWand(image_wand);
 }
 
+// this bit is based on:
+// http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
+
 static void
 donek() {
-    done2();
-#if 0
-    /* Write the image then destroy it. */
-    status=MagickWriteImages(contrast_wand,argv[2],MagickTrue);
-    if (status == MagickFalse) {
-        ThrowWandException(image_wand);
+    MagickWand *m_wand = NULL;
+    PixelWand *p_wand = NULL;
+    PixelIterator *iterator = NULL;
+    PixelWand **pixels = NULL;
+    unsigned long x, y;
+    int i;
+
+    MagickWandGenesis();
+    m_wand = NewMagickWand();
+    p_wand = NewPixelWand();
+    PixelSetColor(p_wand, "white");
+    MagickNewImage(m_wand, www, hhh, p_wand);
+    // Get a new pixel iterator 
+    iterator = NewPixelIterator(m_wand);
+    i = 0;
+    for(y = 0; y < hhh; y++) {
+        // Get the next row of the image as an array of PixelWands
+        pixels = PixelGetNextIteratorRow(iterator, &x);
+        // Set the row of wands to a simple gray scale gradient
+        for(x = 0; x < www; x++) {
+            PixelSetRed(pixels[x], rmean[i]/255.0);
+            PixelSetGreen(pixels[x], gmean[i]/255.0);
+            PixelSetBlue(pixels[x], bmean[i]/255.0);
+            PixelSetAlpha(pixels[x], amean[i]/255.0);
+            i++;
+        }
+        // Sync writes the pixels back to the m_wand
+        PixelSyncIterator(iterator);
     }
-    contrast_wand=DestroyMagickWand(contrast_wand);
+    MagickWriteImage(m_wand, oname);
+    // Clean up
+    iterator = DestroyPixelIterator(iterator);
+    DestroyMagickWand(m_wand);
     MagickWandTerminus();
-#endif
 }
 #endif /* defined(HAVE_MAGICKWAND) */
 
