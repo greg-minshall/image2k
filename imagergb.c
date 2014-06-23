@@ -35,11 +35,11 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include <sys/errno.h>
 #include <sys/stat.h>
 
-#include <Imlib2.h>
+#include "config.h"
 
 #include "imageutils.h"
 
-static unsigned int www, hhh, len, nfiles;
+static unsigned int www, hhh, len;
 static int inited = 0;
 
 static unsigned int avalue = 0; /* output alpha channel */
@@ -58,82 +58,53 @@ usage(char *cmd) {
  */
 
 static void
-init(void) {
-    www = imlib_image_get_width();
-    hhh = imlib_image_get_height();
+init(unsigned int height, unsigned int width) {
+    hhh = height;
+    www = width;
     len = www*hhh;
-    nfiles = 0;
     inited = 1;
 }
 
 static void
-chkcompat(char *file) {
-    unsigned int w, h;
-
-    w = imlib_image_get_width();
-    h = imlib_image_get_height();
-
-    if ((w != www) || (h != hhh)) {
+chkcompat(char *file, unsigned int height, unsigned int width) {
+    if ((width != www) || (height != hhh)) {
         fprintf(stderr, "incompatible file \"%s\": (%d, %d) != (%d, %d)\n",
-                file, www, hhh, w, h);
+                file, www, hhh, width, height);
         exit(6);
         /*NOTREACHED*/
     }
 }
 
 static void
-dofile(char *file) {
-    Imlib_Image image;              /* imlib2 context */
-    Imlib_Load_Error error_return;
-    DATA32 *data;               /* actual image data */
-    int i, val;
-    int r, g, b, a, l, x, y;
-
-    image = imlib_load_image_with_error_return(file, &error_return);
-    if (image == NULL) {
-        fprintf(stderr, "unable to open \"%s\": %s\n",
-                file, image_decode_load_error(error_return));
-        exit(7);
-        /*NOTREACHED*/
-    }
-    imlib_context_set_image(image);
-
+fhw(char *file, unsigned int height, unsigned int width) {
     if (!inited) {
-        init();
+        init(height, width);
     } else {
-        chkcompat(file);
+        chkcompat(file, height, width);
     }
-
-    data = imlib_image_get_data_for_reading_only();
-
-    for (i = 0; i < len; i++) {
-        if (cvalue) {           /* print out x and y coordinates */
-            y = i/www;
-            x = i-(y*www);
-            printf("%d %d ", x, y);
-        }
-        val = data[i];
-        r = GetR(val);
-        g = GetG(val);
-        b = GetB(val);
-        printf("%d %d %d", r, g, b);
-        if (avalue) {           /* print out alpha value */
-            a = GetA(val);
-            printf(" %d", a);
-        }
-        if (lvalue) {           /* (compute and) print out luminance value */
-            l = PPM_ARGB_TO_LUM(val);
-            printf(" %d", l);
-        }
-        printf("\n");
-    }
-    nfiles++;                   /* processed another file */
-    imlib_free_image_and_decache();
 }
 
 static void
-done() {
+output(int i, float fr, float fg, float fb, float fa) {
+    unsigned int r, g, b, a;
+    unsigned int l;
+
+    r = fr;
+    g = fg;
+    b = fb;
+    a = fa;
+
+    printf("%d %d %d", r, g, b);
+    if (avalue) {           /* print out alpha value */
+        printf(" %d", a);
+    }
+    if (lvalue) {           /* (compute and) print out luminance value */
+        l = PPM_RGB_TO_LUM(r, g, b);
+        printf(" %d", l);
+    }
+    printf("\n");
 }
+
 
 int
 main(int argc, char *argv[]) {
@@ -141,14 +112,34 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
+    dofile_t dofile = dofile2;
+    int flag2 = 0, flagk = 0;
     
-    while ((ch = getopt(argc, argv, "acl")) != -1) {
+    while ((ch = getopt(argc, argv, "2ackl")) != -1) {
         switch (ch) {
+        case '2':               /* use Imlib2 */
+#if defined(HAVE_IMLIB2)
+            flag2 = 1;
+#else /* defined(HAVE_IMLIB2) */
+            fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
+            usage(cmd);
+            /*NOTREACHED*/
+#endif /* defined(HAVE_IMLIB2) */
+            break;
         case 'a':
             avalue = 1;
             break;
         case 'c':
             cvalue = 1;
+            break;
+        case 'k':               /* use ImageMagick */
+#if defined(HAVE_MAGICKWAND)
+            flagk = 1;
+#else /* defined(HAVE_MAGICKWAND) */
+            fprintf(stderr, "%s -2: Imlib2 support not compiled in.\n", cmd);
+            usage(cmd);
+            /*NOTREACHED*/
+#endif /* defined(HAVE_MAGICKWAND) */
             break;
         case 'l':
             lvalue = 1;
@@ -159,15 +150,37 @@ main(int argc, char *argv[]) {
         }
     }
 
+
+    if (flag2 && flagk) {
+        fprintf(stderr, "%s: can't specify both -2 and -k\n", cmd);
+        usage(cmd);
+        /*NOTREACHED*/
+    }
+
     argc -= optind;
     argv += optind;
+
+    /* now, arbitrate between Imlib2 and ImageMagick */
+#if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
+    if (flagk) {
+        dofile = dofilek;
+    } else {
+        dofile = dofile2;
+    }
+#elif defined(HAVE_IMLIB2)
+    dofile = dofile2;
+#elif defined(HAVE_MAGICKWAND)
+    dofile = dofilek;
+#else
+// this should not occur!
+#error Need Imlib2 or ImageMagick -- neither defined at compilation time
+#endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
 
     if (argc != 1) {
         usage(cmd);
         /*NOTREACHED*/
     }
 
-    dofile(argv[0]);
-    done();
+    (dofile)(argv[0], fhw, output);
     return(0);
 }
