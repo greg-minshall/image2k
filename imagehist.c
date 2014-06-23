@@ -103,9 +103,9 @@ addhist(int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
-    r = fr;
-    g = fg;
-    b = fb;
+    r = fr*255.0;
+    g = fg*255.0;
+    b = fb*255.0;
 
     l = PPM_RGB_TO_LUM(r, g, b);
     rhist[r]++;

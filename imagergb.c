@@ -89,10 +89,10 @@ output(int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
-    r = fr;
-    g = fg;
-    b = fb;
-    a = fa;
+    r = fr*255.0;
+    g = fg*255.0;
+    b = fb*255.0;
+    a = fa*255.0;
 
     printf("%d %d %d", r, g, b);
     if (avalue) {           /* print out alpha value */

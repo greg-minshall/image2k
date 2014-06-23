@@ -92,7 +92,7 @@ readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
 
     for (i = 0; i < len; i++) {
         val = data[i];
-        (dopix)(i, GetR(val)*1.0, GetG(val)*1.0, GetB(val)*1.0, GetA(val)*1.0);
+        (dopix)(i, GetR(val)/255.0, GetG(val)/255.0, GetB(val)/255.0, GetA(val)/255.0);
     }
     imlib_free_image_and_decache();
 }
@@ -120,10 +120,10 @@ writefile2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixel
         float fr, fg, fb, fa;
 
         (getpixels)(i, &fr, &fg, &fb, &fa);
-        r = fr;
-        g = fg;
-        b = fb;
-        a = fa;
+        r = fr*255.0;
+        g = fg*255.0;
+        b = fb*255.0;
+        a = fa*255.0;
         val |= PutR(val, r);
         val |= PutG(val, g);
         val |= PutB(val, b);
@@ -203,10 +203,10 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
         for (x=0; x < (long) width; x++) {
             // PixelGet* returns in range [0,1); we like [0..255]
             (dopix)(i,
-                    PixelGetRed(pixels[x])*255,
-                    PixelGetGreen(pixels[x])*255,
-                    PixelGetBlue(pixels[x])*255,
-                    PixelGetAlpha(pixels[x])*255);
+                    PixelGetRed(pixels[x]),
+                    PixelGetGreen(pixels[x]),
+                    PixelGetBlue(pixels[x]),
+                    PixelGetAlpha(pixels[x]));
             i++;
         }
     }
@@ -244,10 +244,10 @@ writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixel
         for(x = 0; x < www; x++) {
             float red, green, blue, alpha;
             (getpixels)(i, &red, &green, &blue, &alpha);
-            PixelSetRed(pixels[x], red/255.0);
-            PixelSetGreen(pixels[x], green/255.0);
-            PixelSetBlue(pixels[x], blue/255.0);
-            PixelSetAlpha(pixels[x], alpha/255.0);
+            PixelSetRed(pixels[x], red);
+            PixelSetGreen(pixels[x], green);
+            PixelSetBlue(pixels[x], blue);
+            PixelSetAlpha(pixels[x], alpha);
             i++;
         }
         // Sync writes the pixels back to the m_wand
