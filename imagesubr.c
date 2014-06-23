@@ -104,13 +104,13 @@ done2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
     DATA32 *outdata;
     Imlib_Load_Error imerr;
 
+    len = hhh*www;
     outdata = (DATA32 *)malloc(len*(sizeof (DATA32)));
     if (outdata == NULL) {
         fprintf(stderr, "no room for output buffer\n");
         exit(9);
     }
 
-    len = hhh*www;
     for (i = 0; i < len; i++) {
         val = 0;
         float fr, fg, fb, fa;
