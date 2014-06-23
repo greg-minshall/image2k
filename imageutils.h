@@ -7,19 +7,39 @@
  * when an image file is opened, register the file name, geometry, and
  * height, check for compatibility
  */
-typedef void (*fhwcall_t)(char *file, unsigned int height, unsigned int width);
+typedef void (*fhwcall_t)(char *file,
+                          unsigned int height,
+                          unsigned int width,
+                          unsigned int depth);
 /*
  * for each pixel in the file, do something
  */
-typedef void (*process_t)(int i, float red, float green, float blue, float alpha);
+typedef void (*process_t)(int i,
+                          float red,
+                          float green,
+                          float blue,
+                          float alpha);
 /*
  * when creating an output file, return the pixel RGB values at that location
  */
 typedef void (*getpixels_t)(int i,
-                            float *red, float *green, float *blue, float *alpha);
+                            float *red,
+                            float *green,
+                            float *blue,
+                            float *alpha);
 
 /* used for negotiating between Imlib2 and ImageMagick. */
-typedef void (*readfile_t)(char *file, fhwcall_t dofhw, process_t dopix);
+
+/*
+ * read a file, and process pixels one at a time
+ */
+typedef void (*readfile_t)(char *file,
+                           fhwcall_t dofhw,
+                           process_t dopix);
+
+/*
+ * write a file, accessing the pixels one at a time
+ */
 typedef void (*writefile_t)(char *ofile,
                             unsigned int hhh,
                             unsigned int www,
@@ -33,9 +53,6 @@ typedef void (*writefile_t)(char *ofile,
 
 #define PPM_RGB_TO_LUM(r,g,b)                                        \
     (((r)*PPM_LUMINR)+((g)*PPM_LUMING)+((b)*PPM_LUMINB))
-
-
-#define IMAGE_NVALS 256         /* number of possible values in an image */
 
 
 #if defined(HAVE_IMLIB2)
@@ -52,6 +69,8 @@ channel - so a pixel's bits are ARGB (from most to least significant,
 
  * (from the documentation for imlib_image_get_data())
  */
+
+#define IMLIB2_DEPTH 8          /* 8 bits per channel */
 
 #define GetA(argb) (((argb)>>24)&0xff)
 #define GetR(argb) (((argb)>>16)&0xff)

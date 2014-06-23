@@ -86,7 +86,7 @@ readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
     h = imlib_image_get_height();
     len = w*h;
 
-    (dofhw)(file, h, w);
+    (dofhw)(file, h, w, IMLIB2_DEPTH);
 
     data = imlib_image_get_data_for_reading_only();
 
@@ -177,7 +177,7 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
     PixelWand **pixels;
     register long x;
     unsigned long width;
-    int i = 0, h, w;
+    int i = 0, h, w, d;
 
     /* Read an image. */
     MagickWandGenesis();
@@ -188,8 +188,9 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
     }
     h = MagickGetImageHeight(image_wand);
     w = MagickGetImageWidth(image_wand);
+    d = MagickGetImageDepth(image_wand);
 
-    (dofhw)(file, h, w);
+    (dofhw)(file, h, w, d);
 
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {

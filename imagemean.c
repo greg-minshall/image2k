@@ -42,7 +42,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include "imageutils.h"
 
 
-static unsigned int www, hhh, len, nfiles;
+static unsigned int www, hhh, len, nfiles, depth;
 static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
 static char *oname = 0;
@@ -76,10 +76,12 @@ ravg(int n, unsigned int cur, unsigned int new)
  */
 
 static void
-init(unsigned int height, unsigned int width) {
+init(unsigned int height, unsigned int width, unsigned int passed_depth) {
     hhh = height;
     www = width;
     len = www*hhh;
+    depth = passed_depth;
+
     rmean = (float*) malloc(len*sizeof(float));
     gmean = (float*) malloc(len*sizeof(float));
     bmean = (float*) malloc(len*sizeof(float));
@@ -94,7 +96,7 @@ init(unsigned int height, unsigned int width) {
 }
 
 static void
-chkcompat(char *file, unsigned int height, unsigned int width) {
+chkcompat(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     unsigned int w, h;
 
     h = height;
@@ -110,11 +112,11 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 
 
 static void
-fhw(char *file, unsigned int height, unsigned int width) {
+fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
-        init(height, width);
+        init(height, width, depth);
     } else {
-        chkcompat(file, height, width);
+        chkcompat(file, height, width, depth);
     }
 }
 

@@ -15,6 +15,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
  */
 
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +29,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 #include "imageutils.h"
 
 
-static unsigned int www, hhh, len, arraysize;
+static unsigned int www, hhh, len, arraysize, depth, image_nvals;
 static long *rhist, *ghist, *ahist, *bhist, *lhist;
 
 
@@ -51,12 +52,14 @@ endian(int byte0, int byte1) {
  */
 
 static void
-init(unsigned int height, unsigned int width) {
+init(unsigned int height, unsigned int width, unsigned int passed_depth) {
     hhh = height;
     www = width;
+    depth = passed_depth;
     len = www*hhh;
+    image_nvals = exp2(depth);
 
-    arraysize = IMAGE_NVALS*sizeof(long);
+    arraysize = image_nvals*sizeof(long);
 
     rhist = (long*) malloc(arraysize);
     ghist = (long*) malloc(arraysize);
@@ -79,7 +82,7 @@ init(unsigned int height, unsigned int width) {
 
 
 static void
-chkcompat(char *file, unsigned int height, unsigned int width) {
+chkcompat(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     if ((width != www) || (height != hhh)) {
         fprintf(stderr, "incompatible file \"%s\": (%d, %d) != (%d, %d)\n",
                 file, www, hhh, width, height);
@@ -89,11 +92,11 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 }
 
 static void
-fhw(char *file, unsigned int height, unsigned int width) {
+fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
-        init(height, width);
+        init(height, width, depth);
     } else {
-        chkcompat(file, height, width);
+        chkcompat(file, height, width, depth);
     }
 }
 
@@ -124,7 +127,7 @@ done() {
             printf("----------------------------------------\n");
         }
     }
-    for (i = 0; i < IMAGE_NVALS; i++) {
+    for (i = 0; i < image_nvals; i++) {
         if (rhist[i] || ghist[i] || bhist[i] || ahist[i]) {
             printf("%d %ld %ld %ld %ld %ld\n",
                    i, rhist[i], ghist[i], bhist[i], ahist[i], lhist[i]);

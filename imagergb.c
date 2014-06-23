@@ -39,7 +39,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include "imageutils.h"
 
-static unsigned int www, hhh, len;
+static unsigned int www, hhh, len, depth;
 static int inited = 0;
 
 static unsigned int avalue = 0; /* output alpha channel */
@@ -58,15 +58,16 @@ usage(char *cmd) {
  */
 
 static void
-init(unsigned int height, unsigned int width) {
+init(unsigned int height, unsigned int width, unsigned int passed_depth) {
     hhh = height;
     www = width;
+    depth = passed_depth;
     len = www*hhh;
     inited = 1;
 }
 
 static void
-chkcompat(char *file, unsigned int height, unsigned int width) {
+chkcompat(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     if ((width != www) || (height != hhh)) {
         fprintf(stderr, "incompatible file \"%s\": (%d, %d) != (%d, %d)\n",
                 file, www, hhh, width, height);
@@ -76,11 +77,11 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 }
 
 static void
-fhw(char *file, unsigned int height, unsigned int width) {
+fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
-        init(height, width);
+        init(height, width, depth);
     } else {
-        chkcompat(file, height, width);
+        chkcompat(file, height, width, depth);
     }
 }
 
