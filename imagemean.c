@@ -29,7 +29,6 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
  * % ./a.out -o 130-139.png ~/Downloads/tmp/sensorproblem/L100013?.tif
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,13 +39,14 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include "config.h"
 
-#ifdef HAVE_IMLIB2
+#if defined(HAVE_IMLIB2)
 #include <Imlib2.h>
-#endif /* def HAVE_IMLIB2 */
+#endif /* defined(HAVE_IMLIB2) */
 
-#ifdef HAVE_MAGICKWAND
+#if  defined(HAVE_MAGICKWAND)
 #include <wand/MagickWand.h>
-#endif /* def HAVE_MAGICKWAND */
+#endif /* defined(HAVE_MAGICKWAND) */
+
 
 #include "imageutils.h"
 
@@ -56,8 +56,12 @@ static float *rmean = 0, *gmean = 0, *bmean = 0, *amean = 0;
 static int inited = 0;
 static char *oname = 0;
 
+/* callouts from Imlib2 and ImageMagick code */
+typedef void (*fhwcall_t)(char *file, unsigned int height, unsigned int width);
+typedef void (*pixel_t)(int i, float red, float green, float blue, float alpha);
+
 /* used for negotiating between Imlib2 and ImageMagick. */
-typedef void (*dofile_t)(char *file);
+typedef void (*dofile_t)(char *file, fhwcall_t dofhw, pixel_t dopix);
 typedef void (*done_t)(void);
 
 
@@ -123,6 +127,17 @@ chkcompat(char *file, unsigned int height, unsigned int width) {
 
 
 static void
+fhw(char *file, unsigned int height, unsigned int width) {
+    if (!inited) {
+        init(height, width);
+    } else {
+        chkcompat(file, height, width);
+    }
+}
+
+
+
+static void
 addpixel(int i, float red, float green, float blue, float alpha) {
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
@@ -142,13 +157,12 @@ addpixel(int i, float red, float green, float blue, float alpha) {
 }
 
 
-
-#ifdef HAVE_IMLIB2
+#if defined(HAVE_IMLIB2)
 /*
  * process a file with imlib2
  */
 static void
-dofile2(char *file) {
+dofile2(char *file, fhwcall_t dofhw, pixel_t dopix) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h;
@@ -167,17 +181,13 @@ dofile2(char *file) {
     w = imlib_image_get_width();
     h = imlib_image_get_height();
 
-    if (!inited) {
-        init(h, w);
-    } else {
-        chkcompat(file, h, w);
-    }
+    (dofhw)(file, h, w);
 
     data = imlib_image_get_data_for_reading_only();
 
     for (i = 0; i < len; i++) {
         val = data[i];
-        addpixel(i, GetR(val)*1.0, GetG(val)*1.0, GetB(val)*1.0, GetA(val)*1.0);
+        (dopix)(i, GetR(val)*1.0, GetG(val)*1.0, GetB(val)*1.0, GetA(val)*1.0);
     }
     imlib_free_image_and_decache();
 }
@@ -226,7 +236,7 @@ done2(void) {
     }
     imlib_free_image_and_decache();
 }
-#endif /* def HAVE_IMLIB2 */
+#endif /* defined(HAVE_IMLIB2) */
 
 #if defined(HAVE_MAGICKWAND)
 
@@ -249,7 +259,7 @@ ThrowWandException(MagickWand *wand) {
  */
 
 static void
-dofilek(char *file) {
+    dofilek(char *file, fhwcall_t dofhw, pixel_t dopix) {
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -269,11 +279,9 @@ dofilek(char *file) {
     }
     h = MagickGetImageHeight(image_wand);
     w = MagickGetImageWidth(image_wand);
-    if (!inited) {
-        init(h, w);
-    } else {
-        chkcompat(file, h, w);
-    }
+
+    (dofhw)(file, h, w);
+
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {
         ThrowWandException(image_wand);
@@ -285,11 +293,11 @@ dofilek(char *file) {
         }
         for (x=0; x < (long) width; x++) {
             // PixelGet* returns in range [0,1); we like [0..255]
-            addpixel(i,
-                     PixelGetRed(pixels[x])*255,
-                     PixelGetGreen(pixels[x])*255,
-                     PixelGetBlue(pixels[x])*255,
-                     PixelGetAlpha(pixels[x])*255);
+            (dopix)(i,
+                    PixelGetRed(pixels[x])*255,
+                    PixelGetGreen(pixels[x])*255,
+                    PixelGetBlue(pixels[x])*255,
+                    PixelGetAlpha(pixels[x])*255);
             i++;
         }
     }
@@ -447,7 +455,7 @@ main(int argc, char *argv[]) {
         }
     }
     while (argc > 0) {
-        (*dofile)(argv[0]);
+        (*dofile)(argv[0], fhw, addpixel);
         argv++;
         argc--;
         nfiles++;
