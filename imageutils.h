@@ -2,19 +2,28 @@
 #define __image_h__
 
 /* callouts from Imlib2 and ImageMagick code */
+
+/*
+ * when an image file is opened, register the file name, geometry, and
+ * height, check for compatibility
+ */
 typedef void (*fhwcall_t)(char *file, unsigned int height, unsigned int width);
+/*
+ * for each pixel in the file, do something
+ */
 typedef void (*process_t)(int i, float red, float green, float blue, float alpha);
+/*
+ * when creating an output file, return the pixel RGB values at that location
+ */
 typedef void (*getpixels_t)(int i,
                             float *red, float *green, float *blue, float *alpha);
 
 /* used for negotiating between Imlib2 and ImageMagick. */
-typedef void (*dofile_t)(char *file, fhwcall_t dofhw, process_t dopix);
-typedef void (*done_t)(char *ofile,
-                       unsigned int hhh,
-                       unsigned int www,
-                       getpixels_t getpixels);
-
-
+typedef void (*readfile_t)(char *file, fhwcall_t dofhw, process_t dopix);
+typedef void (*writefile_t)(char *ofile,
+                            unsigned int hhh,
+                            unsigned int www,
+                            getpixels_t getpixels);
 
 // how to compute luminance
 // from netpbm/ppm.h
@@ -57,14 +66,16 @@ channel - so a pixel's bits are ARGB (from most to least significant,
 /*
  * process a file with imlib2
  */
-void dofile2(char *file, fhwcall_t dofhw, process_t dopix);
-void done2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels);
+void readfile2(char *file, fhwcall_t dofhw, process_t dopix);
+void writefile2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels);
 #endif /* defined(HAVE_IMLIB2) */
 
+#if defined(HAVE_MAGICKWAND)
 /*
  * process file with imagemagick
  */
-void dofilek(char *file, fhwcall_t dofhw, process_t dopix);
-void donek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels);
+void readfilek(char *file, fhwcall_t dofhw, process_t dopix);
+void writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels);
+#endif /* defined(HAVE_MAGICKWAND) */
 
 #endif /* ndef __image_h__ */

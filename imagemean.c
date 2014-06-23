@@ -156,8 +156,8 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    dofile_t dofile = dofile2;
-    done_t done = done2;
+    readfile_t readfile = readfile2;
+    writefile_t writefile = writefile2;
     int flag2 = 0, flagk = 0;
     int flagx = 0;              /* undocumented, for internal testing */
 
@@ -218,26 +218,26 @@ main(int argc, char *argv[]) {
     /* now, arbitrate between Imlib2 and ImageMagick */
 #if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
     if (flagk) {
-        dofile = dofilek;
+        readfile = readfilek;
         if (!flagx) {
-            done = donek;
+            writefile = writefilek;
         } else {
-            done = done2;       /* mix and match (for debugging) */
+            writefile = writefile2;       /* mix and match (for debugging) */
         }
     } else {
-        dofile = dofile2;
+        readfile = readfile2;
         if (!flagx) {
-            done = done2;
+            writefile = writefile2;
         } else {
-            done = donek;       /* again, mix and match (for debugging) */
+            writefile = writefilek;       /* again, mix and match (for debugging) */
         }
     }
 #elif defined(HAVE_IMLIB2)
-    dofile = dofile2;
-    done = done2;
+    readfile = readfile2;
+    writefile = writefile2;
 #elif defined(HAVE_MAGICKWAND)
-    dofile = dofilek;
-    done = donek;
+    readfile = readfilek;
+    writefile = writefilek;
 #else
 // this should not occur!
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
@@ -254,13 +254,13 @@ main(int argc, char *argv[]) {
         }
     }
     while (argc > 0) {
-        (*dofile)(argv[0], fhw, addpixel);
+        (*readfile)(argv[0], fhw, addpixel);
         argv++;
         argc--;
         nfiles++;
     }
 #ifdef HAVE_IMLIB2
-    (*done)(oname, hhh, www, getpixels);
+    (*writefile)(oname, hhh, www, getpixels);
 #endif /* def HAVE_IMLIB2 */
     return(0);
 }

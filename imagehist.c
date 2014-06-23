@@ -138,7 +138,7 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    dofile_t dofile = dofile2;
+    readfile_t readfile = readfile2;
     int flag2 = 0, flagk = 0;
     
     while ((ch = getopt(argc, argv, "2hk")) != -1) {
@@ -182,14 +182,14 @@ main(int argc, char *argv[]) {
     /* now, arbitrate between Imlib2 and ImageMagick */
 #if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
     if (flagk) {
-        dofile = dofilek;
+        readfile = readfilek;
     } else {
-        dofile = dofile2;
+        readfile = readfile2;
     }
 #elif defined(HAVE_IMLIB2)
-    dofile = dofile2;
+    readfile = readfile2;
 #elif defined(HAVE_MAGICKWAND)
-    dofile = dofilek;
+    readfile = readfilek;
 #else
 // this should not occur!
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
@@ -200,7 +200,7 @@ main(int argc, char *argv[]) {
         /*NOTREACHED*/
     }
     while (argc > 0) {
-        (dofile)(argv[0], fhw, addhist);
+        (readfile)(argv[0], fhw, addhist);
         argv++;
         argc--;
     }

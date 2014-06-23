@@ -8,19 +8,23 @@
 #include <wand/MagickWand.h>
 #endif /* defined(HAVE_MAGICKWAND) */
 
+/*
+ * this file contains Imlib2 and MagickWand (from ImageMagick)
+ * routines to support the utilities.
+ */
 
 #include "imageutils.h"
 
 #if defined(HAVE_IMLIB2)
 
-// http://docs.enlightenment.org/api/imlib2/html/
+/* http://docs.enlightenment.org/api/imlib2/html/ */
 
 /*
  * return a string "explainig" the reason a load_image (or save_image)
  * failed.
  */
 
-char *
+static char *
 image_decode_load_error(Imlib_Load_Error error) {
     switch (error) {
     case IMLIB_LOAD_ERROR_NONE:
@@ -58,13 +62,11 @@ image_decode_load_error(Imlib_Load_Error error) {
     }
 }
 
-char *image_decode_load_error(Imlib_Load_Error error);
-
 /*
  * process a file with imlib2
  */
 void
-dofile2(char *file, fhwcall_t dofhw, process_t dopix) {
+readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h, len;
@@ -100,7 +102,7 @@ dofile2(char *file, fhwcall_t dofhw, process_t dopix) {
  * finish processing with imlib2
  */
 void
-done2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
+writefile2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
     int i, r, g, b, a, val, len;
     Imlib_Image outimage;
     DATA32 *outdata;
@@ -166,7 +168,7 @@ ThrowWandException(MagickWand *wand) {
  */
 
 void
-dofilek(char *file, fhwcall_t dofhw, process_t dopix) {
+readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -219,7 +221,7 @@ dofilek(char *file, fhwcall_t dofhw, process_t dopix) {
 // http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
 
 void
-donek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
+writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
     MagickWand *m_wand = NULL;
     PixelWand *p_wand = NULL;
     PixelIterator *iterator = NULL;
