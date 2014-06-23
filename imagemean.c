@@ -323,8 +323,9 @@ main(int argc, char *argv[]) {
     dofile_t dofile = dofile2;
     done_t done = done2;
     int flag2 = 0, flagk = 0;
+    int flagx = 0;              /* undocumented, for internal testing */
 
-    while ((ch = getopt(argc, argv, "2fko:")) != -1) {
+    while ((ch = getopt(argc, argv, "2fko:x")) != -1) {
         switch (ch) {
         case '2':               /* use Imlib2 */
 #if defined(HAVE_IMLIB2)
@@ -350,6 +351,19 @@ main(int argc, char *argv[]) {
         case 'o':
             oname = optarg;
             break;
+        case 'x':
+#if !defined(HAVE_IMLIB2)
+            fprintf(stderr, "%s -x: Imlib2 support not compiled in.\n", cmd);
+            usage(cmd);
+            /*NOTREACHED*/
+#elif  !defined(HAVE_MAGICKWAND)
+            fprintf(stderr, "%s -x: MagickWand support not compiled in.\n", cmd);
+            usage(cmd);
+            /*NOTREACHED*/
+#else
+            flagx = 1;
+#endif
+            break;
         default:
             usage(cmd);
             /*NOTREACHED*/
@@ -369,10 +383,18 @@ main(int argc, char *argv[]) {
 #if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
     if (flagk) {
         dofile = dofilek;
-        done = donek;
+        if (!flagx) {
+            done = donek;
+        } else {
+            done = done2;       /* mix and match (for debugging) */
+        }
     } else {
         dofile = dofile2;
-        done = done2;
+        if (!flagx) {
+            done = done2;
+        } else {
+            done = donek;       /* again, mix and match (for debugging) */
+        }
     }
 #elif defined(HAVE_IMLIB2)
     dofile = dofile2;
