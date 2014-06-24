@@ -158,8 +158,8 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    readfile_t readfile = readfile2;
-    writefile_t writefile = writefile2;
+    readfile_t readfile;
+    writefile_t writefile;
     int flag2 = 0, flagk = 0;
     int flagx = 0;              /* undocumented, for internal testing */
 

@@ -141,7 +141,7 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     int force = 0;              /* overwrite file */
     struct stat statbuf;
-    readfile_t readfile = readfile2;
+    readfile_t readfile;
     int flag2 = 0, flagk = 0;
     
     while ((ch = getopt(argc, argv, "2hk")) != -1) {

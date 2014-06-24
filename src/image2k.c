@@ -17,6 +17,9 @@
  * returns.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 
 #if defined(HAVE_IMLIB2)

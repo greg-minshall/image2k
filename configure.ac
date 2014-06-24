@@ -10,22 +10,21 @@ AC_PROG_CC
 # a good reference to PKG_CHECK_MODULES:
 # https://www.flameeyes.eu/autotools-mythbuster/pkgconfig/pkg_check_modules.html
 
-have_imlib2=no
-PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], ["Have Imlib2"])],[have_imlib2=yes])
+have_imlib2=yes
+PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], ["Have Imlib2"])], [have_imlib2=no])
 AC_SUBST(IMLIB2_CFLAGS)
 AC_SUBST(IMLIB2_LIBS)
 
 # this ImageMagick/MagickWand stuff is for some future, mythical time
 # when i will modify the programs to use both libraries.
 
-have_magickwand=no
-PKG_CHECK_MODULES([MAGICKWAND], [MagickWand], [AC_DEFINE([HAVE_MAGICKWAND], [1], ["Have MagickWand"])], [have_magickwand=yes])
+have_magickwand=yes
+PKG_CHECK_MODULES([MAGICKWAND], [MagickWand], [AC_DEFINE([HAVE_MAGICKWAND], [1], ["Have MagickWand"])], [have_magickwand=no])
 AC_SUBST(MAGICKWAND_CFLAGS)
 AC_SUBST(MAGICKWAND_LIBS)
 
 # error if we can find neither Imlib2 nor MagickWand...
-
-if test x${have_imlib2} == xno && test x{have_magickwand} == xno; then
+if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
    AC_MSG_ERROR([
    ---------------------------------------------------
    Neither Imlib2 nor MagickWand (part of ImageMagick)
