@@ -1,3 +1,22 @@
+/*
+ * this file contains routines to read and write image files, using
+ * either the Imlib2
+ * http://docs.enlightenment.org/api/imlib2/html/index.html or
+ * MagickWand, the C API component of ImageMagick
+ * http://www.imagemagick.org/script/magick-wand.php
+ *
+ * the read routines load an image, then call out to register the file
+ * with its attributes (rows, columns, and depth).  they then access
+ * each pixel in the image file, calling out to give the caller a
+ * chance to look at each pixel.  after that, the image file is
+ * closed, and the original call returns.
+ *
+ * the write routines are called with the name of the output file, and
+ * the output file's dimensions.  a call out is made to access each
+ * pixel, and then the output file is created, and the original call
+ * returns.
+ */
+
 #include "config.h"
 
 #if defined(HAVE_IMLIB2)
@@ -13,9 +32,37 @@
  * routines to support the utilities.
  */
 
-#include "imageutils.h"
+#include "image2k.h"
 
 #if defined(HAVE_IMLIB2)
+
+
+/*
+ * These are for use with Imlib2.h, which keeps its data (as returned
+ * from imlib_image_get_data() and friends) in this format:
+
+"The image data is returned in the format of a DATA32 (32 bits) per
+pixel in a linear array ordered from the top left of the image to the
+bottom right going from left to right each line. Each pixel has the
+upper 8 bits as the alpha channel and the lower 8 bits are the blue
+channel - so a pixel's bits are ARGB (from most to least significant,
+8 bits per channel)."
+
+ * (from the documentation for imlib_image_get_data())
+ */
+
+#define IMLIB2_DEPTH 8          /* 8 bits per channel */
+
+#define GetA(argb) (((argb)>>24)&0xff)
+#define GetR(argb) (((argb)>>16)&0xff)
+#define GetG(argb) (((argb)>> 8)&0xff)
+#define GetB(argb) (((argb)    )&0xff)
+
+#define PutA(argb, a) (((argb)&0x00ffffff) | (((a)<<24)&0xff000000))
+#define PutR(argb, b) (((argb)&0xff00ffff) | (((b)<<16)&0x00ff0000))
+#define PutG(argb, g) (((argb)&0xffff00ff) | (((g)<< 8)&0x0000ff00))
+#define PutB(argb, r) (((argb)&0xffffff00) | (((r)    )&0x000000ff))
+
 
 /* http://docs.enlightenment.org/api/imlib2/html/ */
 
@@ -102,11 +149,19 @@ readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
  * finish processing with imlib2
  */
 void
-writefile2(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
+writefile2(char *ofile, unsigned int hhh,
+           unsigned int www, unsigned int depth, getpixels_t getpixels) {
     int i, r, g, b, a, val, len;
     Imlib_Image outimage;
     DATA32 *outdata;
     Imlib_Load_Error imerr;
+
+    if (depth != 8) {
+        fprintf(stderr,
+                "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
+                __FILE__, __LINE__, depth);
+        exit(8);
+    }
 
     len = hhh*www;
     outdata = (DATA32 *)malloc(len*(sizeof (DATA32)));
@@ -222,7 +277,8 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
 // http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
 
 void
-writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixels) {
+writefilek(char *ofile, unsigned int hhh, unsigned int www,
+           unsigned int depth, getpixels_t getpixels) {
     MagickWand *m_wand = NULL;
     PixelWand *p_wand = NULL;
     PixelIterator *iterator = NULL;
@@ -232,9 +288,14 @@ writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixel
 
     MagickWandGenesis();
     m_wand = NewMagickWand();
+    if (!MagickSetDepth(m_wand, depth)) {
+        ThrowWandException(m_wand);
+    }
     p_wand = NewPixelWand();
     PixelSetColor(p_wand, "white");
-    MagickNewImage(m_wand, www, hhh, p_wand);
+    if (!MagickNewImage(m_wand, www, hhh, p_wand)) {
+        ThrowWandException(m_wand);
+    }
     // Get a new pixel iterator 
     iterator = NewPixelIterator(m_wand);
     i = 0;
@@ -260,6 +321,7 @@ writefilek(char *ofile, unsigned int hhh, unsigned int www, getpixels_t getpixel
     // Clean up
     iterator = DestroyPixelIterator(iterator);
     DestroyMagickWand(m_wand);
+    DestroyPixelWand(p_wand);
     MagickWandTerminus();
 }
 #endif /* defined(HAVE_MAGICKWAND) */

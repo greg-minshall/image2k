@@ -26,7 +26,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 #include "config.h"
 
-#include "imageutils.h"
+#include "image2k.h"
 
 
 static unsigned int www, hhh, len, arraysize, depth, image_nvals;

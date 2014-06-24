@@ -4,7 +4,7 @@ imagehist.o
 imagehist
 imagergb.o
 imagergb
-imagesubr.o
+image2k.o
 .deps/
 Makefile
 Makefile.in
