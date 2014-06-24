@@ -16,21 +16,25 @@
 
 /*
  * callouts from Imlib2 and MagickWand supporting code back to the
- * application code
+ * application code.  the (void *) "cookie" parameter allows the
+ * application to pass in a correlation parameter (to recover some
+ * data structure between calls in and calls out).
  */
 
 /*
  * when an image file is opened, register the file name, geometry, and
  * height, check for compatibility
  */
-typedef void (*fhwcall_t)(char *file,
+typedef void (*fhwcall_t)(void *cookie,
+                          char *file,
                           unsigned int height,
                           unsigned int width,
                           unsigned int depth);
 /*
  * for each pixel in the file, do something
  */
-typedef void (*process_t)(int i,
+typedef void (*process_t)(void *cookie,
+                          int i,
                           float red,
                           float green,
                           float blue,
@@ -39,7 +43,8 @@ typedef void (*process_t)(int i,
  * when creating an output file, return the pixel RGB values at that
  * location
  */
-typedef void (*getpixels_t)(int i,
+typedef void (*getpixels_t)(void *cookie,
+                            int i,
                             float *red,
                             float *green,
                             float *blue,
@@ -55,14 +60,16 @@ typedef void (*getpixels_t)(int i,
 /*
  * read a file, and process pixels one at a time
  */
-typedef void (*readfile_t)(char *file,
+typedef void (*readfile_t)(void *cookie,
+                           char *file,
                            fhwcall_t dofhw,
                            process_t dopix);
 
 /*
  * write a file, accessing the pixels one at a time
  */
-typedef void (*writefile_t)(char *ofile,
+typedef void (*writefile_t)(void *cookie,
+                            char *ofile,
                             unsigned int hhh,
                             unsigned int www,
                             unsigned int depth,
@@ -79,13 +86,10 @@ typedef void (*writefile_t)(char *ofile,
 /*
  * process a file with imlib2
  */
-void readfile2(char *file,
-               fhwcall_t dofhw,
-               process_t dopix);
-void writefile2(char *ofile,
-                unsigned int hhh,
-                unsigned int www,
-                unsigned int depth,
+void readfile2(void *cookie, char *file,
+               fhwcall_t dofhw, process_t dopix);
+void writefile2(void *cookie, char *ofile,
+                unsigned int hhh, unsigned int www, unsigned int depth,
                 getpixels_t getpixels);
 #endif /* defined(HAVE_IMLIB2) */
 
@@ -93,13 +97,10 @@ void writefile2(char *ofile,
 /*
  * process file with imagemagick
  */ 
-void readfilek(char *file,
-               fhwcall_t dofhw,
-               process_t dopix);
-void writefilek(char *ofile,
-                unsigned int hhh,
-                unsigned int www,
-                unsigned int depth,
+void readfilek(void *cookie, char *file,
+               fhwcall_t dofhw, process_t dopix);
+void writefilek(void *cookie, char *ofile,
+                unsigned int hhh, unsigned int www, unsigned int depth,
                 getpixels_t getpixels);
 #endif /* defined(HAVE_MAGICKWAND) */
 

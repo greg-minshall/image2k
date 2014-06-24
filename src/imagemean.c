@@ -112,7 +112,8 @@ chkcompat(char *file, unsigned int height, unsigned int width, unsigned int dept
 
 
 static void
-fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
+fhw(void *cookie, char *file,
+    unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
     } else {
@@ -123,7 +124,7 @@ fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
 
 
 static void
-addpixel(int i, float red, float green, float blue, float alpha) {
+addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
 #endif /* 0 */
@@ -142,7 +143,8 @@ addpixel(int i, float red, float green, float blue, float alpha) {
 }
 
 static void
-getpixels(int i, float *pred, float *pgreen, float *pblue, float *palpha) {
+getpixels(void *cookie, int i,
+          float *pred, float *pgreen, float *pblue, float *palpha) {
     *pred = rmean[i];
     *pgreen = gmean[i];
     *pblue = bmean[i];
@@ -256,13 +258,13 @@ main(int argc, char *argv[]) {
         }
     }
     while (argc > 0) {
-        (*readfile)(argv[0], fhw, addpixel);
+        (*readfile)(0, argv[0], fhw, addpixel);
         argv++;
         argc--;
         nfiles++;
     }
 #ifdef HAVE_IMLIB2
-    (*writefile)(oname, hhh, www, depth, getpixels);
+    (*writefile)(0, oname, hhh, www, depth, getpixels);
 #endif /* def HAVE_IMLIB2 */
     return(0);
 }

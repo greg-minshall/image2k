@@ -116,7 +116,7 @@ image_decode_load_error(Imlib_Load_Error error) {
  * process a file with imlib2
  */
 void
-readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
+readfile2(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h, len;
@@ -136,13 +136,14 @@ readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
     h = imlib_image_get_height();
     len = w*h;
 
-    (dofhw)(file, h, w, IMLIB2_DEPTH);
+    (dofhw)(cookie, file, h, w, IMLIB2_DEPTH);
 
     data = imlib_image_get_data_for_reading_only();
 
     for (i = 0; i < len; i++) {
         val = data[i];
-        (dopix)(i, GetR(val)/255.0, GetG(val)/255.0, GetB(val)/255.0, GetA(val)/255.0);
+        (dopix)(cookie, i,
+                GetR(val)/255.0, GetG(val)/255.0, GetB(val)/255.0, GetA(val)/255.0);
     }
     imlib_free_image_and_decache();
 }
@@ -152,7 +153,7 @@ readfile2(char *file, fhwcall_t dofhw, process_t dopix) {
  * finish processing with imlib2
  */
 void
-writefile2(char *ofile, unsigned int hhh,
+writefile2(void *cookie, char *ofile, unsigned int hhh,
            unsigned int www, unsigned int depth, getpixels_t getpixels) {
     int i, r, g, b, a, val, len;
     Imlib_Image outimage;
@@ -177,7 +178,7 @@ writefile2(char *ofile, unsigned int hhh,
         val = 0;
         float fr, fg, fb, fa;
 
-        (getpixels)(i, &fr, &fg, &fb, &fa);
+        (getpixels)(cookie, i, &fr, &fg, &fb, &fa);
         r = fr*255.0;
         g = fg*255.0;
         b = fb*255.0;
@@ -226,7 +227,7 @@ ThrowWandException(MagickWand *wand) {
  */
 
 void
-readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
+readfilek(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -248,7 +249,7 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
     w = MagickGetImageWidth(image_wand);
     d = MagickGetImageDepth(image_wand);
 
-    (dofhw)(file, h, w, d);
+    (dofhw)(cookie, file, h, w, d);
 
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {
@@ -261,7 +262,7 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
         }
         for (x=0; x < (long) width; x++) {
             // PixelGet* returns in range [0,1); we like [0..255]
-            (dopix)(i,
+            (dopix)(cookie, i,
                     PixelGetRed(pixels[x]),
                     PixelGetGreen(pixels[x]),
                     PixelGetBlue(pixels[x]),
@@ -280,7 +281,8 @@ readfilek(char *file, fhwcall_t dofhw, process_t dopix) {
 // http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
 
 void
-writefilek(char *ofile, unsigned int hhh, unsigned int www,
+writefilek(void *cookie, char *ofile,
+           unsigned int hhh, unsigned int www,
            unsigned int depth, getpixels_t getpixels) {
     MagickWand *m_wand = NULL;
     PixelWand *p_wand = NULL;
@@ -308,7 +310,7 @@ writefilek(char *ofile, unsigned int hhh, unsigned int www,
         // Set the row of wands to a simple gray scale gradient
         for(x = 0; x < www; x++) {
             float red, green, blue, alpha;
-            (getpixels)(i, &red, &green, &blue, &alpha);
+            (getpixels)(cookie, i, &red, &green, &blue, &alpha);
             PixelSetRed(pixels[x], red);
             PixelSetGreen(pixels[x], green);
             PixelSetBlue(pixels[x], blue);

@@ -77,7 +77,8 @@ chkcompat(char *file, unsigned int height, unsigned int width, unsigned int dept
 }
 
 static void
-fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
+fhw(void *cookie, char *file,
+    unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
     } else {
@@ -86,7 +87,7 @@ fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
 }
 
 static void
-output(int i, float fr, float fg, float fb, float fa) {
+output(void *cookie, int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
@@ -182,6 +183,6 @@ main(int argc, char *argv[]) {
         /*NOTREACHED*/
     }
 
-    (readfile)(argv[0], fhw, output);
+    (readfile)(0, argv[0], fhw, output);
     return(0);
 }

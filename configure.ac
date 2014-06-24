@@ -16,8 +16,8 @@ CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
 
 
-AC_LANG([C])
 AC_PROG_CC
+AC_PROG_CPP
 
 # a good reference to PKG_CHECK_MODULES:
 # https://www.flameeyes.eu/autotools-mythbuster/pkgconfig/pkg_check_modules.html
@@ -39,9 +39,9 @@ AC_SUBST(MAGICKWAND_LIBS)
 if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
    AC_MSG_ERROR([
    ---------------------------------------------------
-   Neither Imlib2 nor MagickWand (part of ImageMagick)
-   are available on this system (as configured).
-   Unable to build this package.
+   Neither Imlib2 nor MagickWand (an optional part of
+   ImageMagick) are available on this system (as
+   configured).  Unable to build this package.
    ---------------------------------------------------])
 fi
 

@@ -92,7 +92,8 @@ chkcompat(char *file, unsigned int height, unsigned int width, unsigned int dept
 }
 
 static void
-fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
+fhw(void *cookie, char *file,
+    unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
     } else {
@@ -102,7 +103,7 @@ fhw(char *file, unsigned int height, unsigned int width, unsigned int depth) {
 
 
 static void
-addhist(int i, float fr, float fg, float fb, float fa) {
+addhist(void *cookie, int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
@@ -203,7 +204,7 @@ main(int argc, char *argv[]) {
         /*NOTREACHED*/
     }
     while (argc > 0) {
-        (readfile)(argv[0], fhw, addhist);
+        (readfile)(0, argv[0], fhw, addhist);
         argv++;
         argc--;
     }
