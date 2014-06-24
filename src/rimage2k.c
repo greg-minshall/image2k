@@ -253,6 +253,15 @@ rimageread(SEXP args) {
     return rval;
 }
 
+static SEXP
+rimagewrite(SEXP args) {
+    const char *file;
+    SEXP xfile, rval, names;
+    mytype_p mp;
+    writefile_t writefile;
+    int bytes, protected = 0;
+}
+
 /* R glue */
 
 static const

@@ -96,7 +96,8 @@ init(unsigned int height, unsigned int width, unsigned int passed_depth) {
 }
 
 static void
-chkcompat(char *file, unsigned int height, unsigned int width, unsigned int depth) {
+chkcompat(const char *file,
+          unsigned int height, unsigned int width, unsigned int depth) {
     unsigned int w, h;
 
     h = height;
@@ -112,7 +113,7 @@ chkcompat(char *file, unsigned int height, unsigned int width, unsigned int dept
 
 
 static void
-fhw(void *cookie, char *file,
+fhw(void *cookie, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);

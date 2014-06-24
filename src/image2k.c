@@ -116,7 +116,7 @@ image_decode_load_error(Imlib_Load_Error error) {
  * process a file with imlib2
  */
 void
-readfile2(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
+readfile2(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h, len;
@@ -153,7 +153,7 @@ readfile2(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
  * finish processing with imlib2
  */
 void
-writefile2(void *cookie, char *ofile, unsigned int hhh,
+writefile2(void *cookie, const char *ofile, unsigned int hhh,
            unsigned int www, unsigned int depth, getpixels_t getpixels) {
     int i, r, g, b, a, val, len;
     Imlib_Image outimage;
@@ -227,7 +227,7 @@ ThrowWandException(MagickWand *wand) {
  */
 
 void
-readfilek(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
+readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -281,7 +281,7 @@ readfilek(void *cookie, char *file, fhwcall_t dofhw, process_t dopix) {
 // http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
 
 void
-writefilek(void *cookie, char *ofile,
+writefilek(void *cookie, const char *ofile,
            unsigned int hhh, unsigned int www,
            unsigned int depth, getpixels_t getpixels) {
     MagickWand *m_wand = NULL;
