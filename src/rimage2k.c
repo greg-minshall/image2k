@@ -77,6 +77,7 @@ void2mytype(void *cookie) {
         error("%s:%d: problems with cookies", __FILE__, __LINE__);
         /*NOTREACHED*/
     }
+    return mp;
 }
 
 static void *
@@ -90,6 +91,15 @@ list6(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x)
 {
     PROTECT(s);
     s = CONS(s, list5(t, u, v, w, x));
+    UNPROTECT(1);
+    return s;
+}
+
+static SEXP
+list7(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x, SEXP y)
+{
+    PROTECT(s);
+    s = CONS(s, list6(t, u, v, w, x, y));
     UNPROTECT(1);
     return s;
 }
@@ -109,7 +119,7 @@ init(mytype_p mp,
 
     mp->hhh = height;
     mp->www = width;
-    mp->len = www*hhh;
+    mp->len = mp->www*mp->hhh;
     mp->depth = passed_depth;
 
     bytes = mp->www*mp->hhh;
@@ -121,11 +131,11 @@ init(mytype_p mp,
 
     mp->protected += 4;
 
-    inited = 1;
+    mp->inited = 1;
 }
 
 static void
-fhw(void *cookie, char *file,
+fhw(void *cookie, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
     mytype_p mp = void2mytype(cookie);
 
@@ -138,7 +148,7 @@ fhw(void *cookie, char *file,
 static void
 addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
     mytype_p mp = void2mytype(cookie);
-    float *r, *g, *b, *a;
+    double *r, *g, *b, *a;
 
     r = REAL(mp->sr);
     g = REAL(mp->sg);
@@ -155,6 +165,7 @@ addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
 }
 
 
+#if 0
 static void
 getpixels(void *cookie, int i,
           float *pred, float *pgreen, float *pblue, float *palpha) {
@@ -175,6 +186,7 @@ getpixels(void *cookie, int i,
     *pblue = mp->bpixels[i];
     *palpha = mp->apixels[i];
 }
+#endif
 
 /*
  * given the name of an image file, return some of its metadata and
@@ -182,7 +194,7 @@ getpixels(void *cookie, int i,
  */
 
 static SEXP
-rimageall(SEXP args) {
+rimageread(SEXP args) {
     const char *file;
     SEXP xfile, rval, names;
     mytype_p mp;
@@ -209,26 +221,28 @@ rimageall(SEXP args) {
     protected++;
     file = CHAR(STRING_ELT(xfile, 0));
 
-    mp = newmytype();
+    mp = mytypecreate();
 
     /* read in the image, filling in *mp as a side effect */
     (readfile)(mp, file, fhw, addpixel);
 
     // now, put together the return: height, width, r, g, b
-    rval = PROTECT(list6(PROTECT(ScalarReal(hhh)),    /* 1,2 */
-                         PROTECT(ScalarReal(www)),    /* 3 */
-                         PROTECT(ScalarReal(maxval)), /* 4 */
-                         sr,
-                         sg,
-                         sb));
+    rval = PROTECT(list7(PROTECT(ScalarReal(mp->hhh)),    /* 1,2 */
+                         PROTECT(ScalarReal(mp->www)),    /* 3 */
+                         PROTECT(ScalarReal(exp2(mp->depth))), /* 4 */
+                         mp->sr,
+                         mp->sg,
+                         mp->sb,
+                         mp->sa));
     protected += 4;
-    names = PROTECT(list6(PROTECT(mkString("nr")), /* 1,2 */
-                          PROTECT(mkString("nc")), /* 3 */
+    names = PROTECT(list7(PROTECT(mkString("nr")),     /* 1,2 */
+                          PROTECT(mkString("nc")),     /* 3 */
                           PROTECT(mkString("maxval")), /* 4 */
-                          PROTECT(mkString("red")),   /* 5 */
-                          PROTECT(mkString("green")),   /* 6 */
-                          PROTECT(mkString("blue")))); /* 7 */
-    protected += 7;
+                          PROTECT(mkString("red")),    /* 5 */
+                          PROTECT(mkString("green")),  /* 6 */
+                          PROTECT(mkString("blue")),   /* 7 */
+                          PROTECT(mkString("alpha")))); /* 8 */
+    protected += 8;
     namesgets(rval, names);
 
     protected += mp->protected;
@@ -244,7 +258,7 @@ rimageall(SEXP args) {
 static const
 R_ExternalMethodDef externalMethods[] = {
    {"rimageread",  (DL_FUNC) &rimageread, 1},
-   {"rimageread",  (DL_FUNC) &rimagewrite, 1},
+   {"rimagewrite",  (DL_FUNC) &rimagewrite, 1},
    NULL
 };
 
