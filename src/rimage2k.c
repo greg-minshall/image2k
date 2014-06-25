@@ -14,7 +14,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-// #include "config.h"
+#include "config.h"
 
 #include "image2k.h"
 

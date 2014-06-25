@@ -208,6 +208,12 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
 
 #if defined(HAVE_MAGICKWAND)
 
+/*
+ * the ImageMagick bits are mostly copied from the sample program
+ * here:
+ * http://www.imagemagick.org/script/magick-wand.php
+ */
+
 static void
 ThrowWandException(MagickWand *wand) {
     char *description;
@@ -220,11 +226,6 @@ ThrowWandException(MagickWand *wand) {
     exit(-1);
             }
 
-/*
- * the ImageMagick bits are mostly copied from the sample program
- * here:
- * http://www.imagemagick.org/script/magick-wand.php
- */
 
 void
 readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
