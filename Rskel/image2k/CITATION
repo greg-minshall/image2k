@@ -1,0 +1,28 @@
+## bits and pieces of this code is from other sources, most notably:
+
+bibentry(bibtype="Unpublished",
+        author="Carsten Haitzler",
+        note="Imlib 2 is the successor to Imlib.",
+        title="Imlib2 Library Documentation",
+        url="http://docs.enlightenment.org/api/imlib2/html");
+
+bibentry(bibtype="Unpublished",
+         author="ImageMagick Studio LLC",
+         note="Source at http://www.imagemagick.org/source/contrast.c",
+         title="MagickWand C API",
+         url="http://www.imagemagick.org/script/magick-wand.php");
+
+bibentry(bibtype="Unpublished",
+         author="el_supremo@hotmail.com",
+         note="From 'MagickWand Examples in C'",
+         title="Create a simple grayscale gradient using Pixel Iterators",
+         url="http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm");
+
+bibentry(bibtype="article",
+         author="Duncan Temple Lang",
+         journal="R News",
+         title="In Search of C/C++ & FORTRAN Routines",
+         url="http://www.r-project.org/doc/Rnews/Rnews_2001-3.pdf",
+         volume=1, number=3,
+         year=2001,
+         pages=20:23);
