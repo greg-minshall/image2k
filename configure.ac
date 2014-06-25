@@ -13,10 +13,14 @@ if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
   exit 1
 fi
-CC=`"${R_HOME}/bin/R" CMD config CC`
-CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
-CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
-LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
+R_CC=`"${R_HOME}/bin/R" CMD config CC`
+R_CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+R_CPPFLAGS=`"${R_HOME}/bin/R" CMD config --cppflags`
+R_LDFLAGS=`"${R_HOME}/bin/R" CMD config --ldflags`
+AC_SUBST(R_CC)
+AC_SUBST(R_CFLAGS)
+AC_SUBST(R_CPPFLAGS)
+AC_SUBST(R_LDFLAGS)
 
 
 AC_PROG_CC
