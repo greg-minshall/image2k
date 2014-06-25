@@ -16,4 +16,3 @@ librimage2k_la_CPPFLAGS = ${R_CPPFLAGS} ${AM_CPPFLAGS}
 librimage2k_la_LDFLAGS = ${R_LDFLAGS} ${AM_LDFLAGS}
 librimage2k_la_CC = ${R_CC}
 
-ACLOCAL_AMFLAGS = -I m4
