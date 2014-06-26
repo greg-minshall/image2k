@@ -51,7 +51,7 @@ static mytype_p
 mytypecreate() {
     mytype_p mp;
 
-    mp = (mytype_p)malloc(sizeof *mp);
+    mp = (mytype_p)R_alloc(1, sizeof *mp);
     if (mp == 0) {
         error("%s:%d: unable to allocate %d bytes of memory",
               __FILE__, __LINE__, sizeof *mp);
@@ -65,7 +65,10 @@ mytypecreate() {
 
 static void
 mytypedestroy(mytype_p mp) {
-    free(mp);
+    /*
+     * we're using R_alloc, so R will the memory when we
+     * exit back to R
+     */
 }
         
 
@@ -188,10 +191,36 @@ getpixels(void *cookie, int i,
 }
 #endif
 
+
+/*
+ * from "Writing R Extensions" (in turn said to be based on a similar
+ * routine in the package stats)
+ */
+
+/* get the list element named str, or return NULL */
+SEXP getListElement(SEXP list, const char *str)
+{
+    SEXP
+        elmt = R_NilValue,
+        names = getAttrib(list, R_NamesSymbol);
+    int i;
+
+    for (i = 0; i < length(list); i++) {
+	if(strcmp(CHAR(STRING_ELT(names, i)), str) == 0) {
+	   elmt = VECTOR_ELT(list, i);
+	   break;
+	}
+    }
+    return elmt;
+}
+
+
 /*
  * given the name of an image file, return some of its metadata and
  * its R, G, and B channels.
  */
+
+/* usage: rimageread(char *filename, bool usemagickwand); */
 
 static SEXP
 rimageread(SEXP args) {
@@ -200,10 +229,23 @@ rimageread(SEXP args) {
     mytype_p mp;
     readfile_t readfile;
     int bytes, protected = 0;
+    int usemagick;
 
-    /* which should we use, Imlib2 or MagicWand? */
+    /* first, get file name */
+
+    xfile = PROTECT(coerceVector(CADR(args), STRSXP)); /* 1 */
+    protected++;
+    file = CHAR(STRING_ELT(xfile, 0));
+
+    /* second, get library to use */
+    usemagick = asLogical(CADDR(args));
+    if (usemagick == NA_LOGICAL) {
+        error("'usemagickwand' must be TRUE or FALSE");
+    }
+
+    /* now, which should we use, Imlib2 or MagicWand? */
 #if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
-    if (flagk) {
+    if (usemagick) {
         readfile = readfilek;
     } else {
         readfile = readfile2;
@@ -217,10 +259,6 @@ rimageread(SEXP args) {
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
 #endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
 
-    xfile = PROTECT(coerceVector(CADR(args), STRSXP)); /* 1 */
-    protected++;
-    file = CHAR(STRING_ELT(xfile, 0));
-
     mp = mytypecreate();
 
     /* read in the image, filling in *mp as a side effect */
@@ -229,7 +267,7 @@ rimageread(SEXP args) {
     // now, put together the return: height, width, r, g, b
     rval = PROTECT(list7(PROTECT(ScalarReal(mp->hhh)),    /* 1,2 */
                          PROTECT(ScalarReal(mp->www)),    /* 3 */
-                         PROTECT(ScalarReal(exp2(mp->depth))), /* 4 */
+                         PROTECT(ScalarReal(mp->depth)), /* 4 */
                          mp->sr,
                          mp->sg,
                          mp->sb,
@@ -237,7 +275,7 @@ rimageread(SEXP args) {
     protected += 4;
     names = PROTECT(list7(PROTECT(mkString("nr")),     /* 1,2 */
                           PROTECT(mkString("nc")),     /* 3 */
-                          PROTECT(mkString("maxval")), /* 4 */
+                          PROTECT(mkString("depth")), /* 4 */
                           PROTECT(mkString("red")),    /* 5 */
                           PROTECT(mkString("green")),  /* 6 */
                           PROTECT(mkString("blue")),   /* 7 */
