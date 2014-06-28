@@ -83,11 +83,6 @@ void2mytype(void *cookie) {
     return mp;
 }
 
-static void *
-mytype2void(mytype_p mytype) {
-    return (void *) mytype;
-}
-
 /* Rinlinedfuns.h:list5++ */
 static SEXP
 list6(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x)
@@ -138,9 +133,9 @@ init(mytype_p mp,
 }
 
 static void
-fhw(void *cookie, const char *file,
+fhw(im2k_p im2k, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
-    mytype_p mp = void2mytype(cookie);
+    mytype_p mp = void2mytype(im2k->cookie);
 
     if (!mp->inited) {
         init(mp, height, width, depth);
@@ -149,8 +144,8 @@ fhw(void *cookie, const char *file,
 
 
 static void
-addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
-    mytype_p mp = void2mytype(cookie);
+addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
+    mytype_p mp = void2mytype(im2k->cookie);
     double *r, *g, *b, *a;
 
     r = REAL(mp->sr);
@@ -170,9 +165,9 @@ addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
 
 #if 0
 static void
-getpixels(void *cookie, int i,
+getpixels(im2k_p im2k, int i,
           float *pred, float *pgreen, float *pblue, float *palpha) {
-    mytype_p mp = void2mytype(cookie);
+    mytype_p mp = void2mytype(im2k->cookie);
 
     // now, map data, copy it to the R structure, and free it
     data = imlib_image_get_data_for_reading_only();
@@ -228,8 +223,9 @@ rimageread(SEXP args) {
     SEXP xfile, rval, names;
     mytype_p mp;
     readfile_t readfile;
-    int bytes, protected = 0;
+    int protected = 0;
     int usemagick;
+    im2k_t im2k;
 
     /* first, get file name */
 
@@ -261,8 +257,13 @@ rimageread(SEXP args) {
 
     mp = mytypecreate();
 
+    im2k.fprintf = fprintf;
+    im2k.exit = exit;
+    im2k.malloc = malloc;
+    im2k.cookie = mp;
+
     /* read in the image, filling in *mp as a side effect */
-    (readfile)(mp, file, fhw, addpixel);
+    (readfile)(&im2k, file, fhw, addpixel);
 
     // now, put together the return: height, width, r, g, b
     rval = PROTECT(list7(PROTECT(ScalarReal(mp->hhh)),    /* 1,2 */
@@ -293,23 +294,26 @@ rimageread(SEXP args) {
 
 static SEXP
 rimagewrite(SEXP args) {
+#if 0
     const char *file;
     SEXP xfile, rval, names;
     mytype_p mp;
     writefile_t writefile;
     int bytes, protected = 0;
+#endif /* 0 */
+    return(0);                  /* XXX */
 }
 
 /* R glue */
 
 static const
 R_ExternalMethodDef externalMethods[] = {
-   {"rimageread",  (DL_FUNC) &rimageread, 1},
-   {"rimagewrite",  (DL_FUNC) &rimagewrite, 1},
-   NULL
+   {"rimageread",  (DL_FUNC) &rimageread, -1},
+   {"rimagewrite",  (DL_FUNC) &rimagewrite, -1},
+   {NULL}
 };
 
-void R_init_myRoutines(DllInfo *info)
+void R_init_rimage2k(DllInfo *info)
 {
  /* Register the .External routine.
   * No .C, .Call, or Fortran routines,
