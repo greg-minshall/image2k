@@ -221,7 +221,6 @@ writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
 static void
 ThrowWandException(im2k_p im2k, MagickWand *wand) {
     char *description;
-    char buffer[1000];          /* hopefully big enough */
 
     ExceptionType severity;
 
@@ -237,7 +236,6 @@ void
 readfilek(im2k_p im2k, const char *file, fhwcall_t dofhw, process_t dopix) {
     long y;
     MagickBooleanType status;
-    MagickPixelPacket pixel;
     MagickWand *image_wand;
     PixelIterator *iterator;
     PixelWand **pixels;

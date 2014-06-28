@@ -54,22 +54,6 @@ usage(char *cmd) {
     exit(1);
 }
 
-static int
-endian(int byte0, int byte1) {
-    return (byte1*0x100)+byte0; /* XXX little endian */
-}
-
-
-/*
- * we've calculated the running average CUR of N samples, and now
- * compute the running average taking into account the sample NEW.
- */
-static unsigned int
-ravg(int n, unsigned int cur, unsigned int new)
-{
-    return cur+((new-cur)/n);
-}
-
 
 /*
  * initialize data structures

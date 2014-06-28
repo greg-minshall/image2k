@@ -42,10 +42,6 @@ usage(char *cmd) {
     exit(1);
 }
 
-static int
-endian(int byte0, int byte1) {
-    return (byte1*0x100)+byte0; /* XXX little endian */
-}
 
 /*
  * initialize data structures
@@ -105,7 +101,7 @@ fhw(im2k_p im2k, const char *file,
 
 static void
 addhist(im2k_p im2k, int i, float fr, float fg, float fb, float fa) {
-    unsigned int r, g, b, a;
+    unsigned int r, g, b;
     unsigned int l;
 
     r = fr*255.0;
@@ -121,7 +117,7 @@ addhist(im2k_p im2k, int i, float fr, float fg, float fb, float fa) {
 
 static void
 done() {
-    int i, r, g, b, a, val;
+    int i;
 
     if (hflag) {                /* print out a header */
         printf("value rcount gcount bcount acount lcount\n");
@@ -141,8 +137,6 @@ int
 main(int argc, char *argv[]) {
     int ch;
     char *cmd = argv[0];
-    int force = 0;              /* overwrite file */
-    struct stat statbuf;
     readfile_t readfile;
     int flag2 = 0, flagk = 0;
     

@@ -113,8 +113,6 @@ int
 main(int argc, char *argv[]) {
     int ch;
     char *cmd = argv[0];
-    int force = 0;              /* overwrite file */
-    struct stat statbuf;
     readfile_t readfile;
     int flag2 = 0, flagk = 0;
     im2k_t im2k;
