@@ -194,6 +194,7 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
         fprintf(stderr, "unable to create output image structures (internal): ");
         perror("");
         exit(10);
+        /*NOTREACHED*/
     }
     imlib_context_set_image(outimage);    
     imlib_save_image_with_error_return(ofile, &imerr);
@@ -201,6 +202,7 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
         fprintf(stderr, "error saving output file \"%s\": ", ofile);
         perror("");
         exit(10);
+        /*NOTREACHED*/
     }
     imlib_free_image_and_decache();
 }
@@ -224,7 +226,8 @@ ThrowWandException(MagickWand *wand) {
     (void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description);
     description=(char *) MagickRelinquishMemory(description);
     exit(-1);
-            }
+    /*NOTREACHED*/
+}
 
 
 void
@@ -245,6 +248,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     status = MagickReadImage(image_wand, file);
     if (status == MagickFalse) {
         ThrowWandException(image_wand);
+        /*NOTREACHED*/
     }
     h = MagickGetImageHeight(image_wand);
     w = MagickGetImageWidth(image_wand);
@@ -255,6 +259,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {
         ThrowWandException(image_wand);
+        /*NOTREACHED*/
     }
     for (y=0; y < h; y++) {
         pixels = PixelGetNextIteratorRow(iterator,&width);
@@ -273,6 +278,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     }
     if (y < (long) MagickGetImageHeight(image_wand)) {
         ThrowWandException(image_wand);
+        /*NOTREACHED*/
     }
     iterator = DestroyPixelIterator(iterator);
     image_wand = DestroyMagickWand(image_wand);
@@ -296,11 +302,13 @@ writefilek(void *cookie, const char *ofile,
     m_wand = NewMagickWand();
     if (!MagickSetDepth(m_wand, depth)) {
         ThrowWandException(m_wand);
+        /*NOTREACHED*/
     }
     p_wand = NewPixelWand();
     PixelSetColor(p_wand, "white");
     if (!MagickNewImage(m_wand, www, hhh, p_wand)) {
         ThrowWandException(m_wand);
+        /*NOTREACHED*/
     }
     // Get a new pixel iterator 
     iterator = NewPixelIterator(m_wand);
@@ -323,6 +331,7 @@ writefilek(void *cookie, const char *ofile,
     }
     if (!MagickWriteImage(m_wand, ofile)) {
         ThrowWandException(m_wand);
+        /*NOTREACHED*/
     }
     // Clean up
     iterator = DestroyPixelIterator(iterator);
