@@ -26,3 +26,10 @@ bibentry(bibtype="article",
          volume=1, number=3,
          year=2001,
          pages=20:23);
+
+bibentry(bibtype="Unpublished",
+        author="R Development Core Team",
+        title="Writing R Extensions",
+        note="Writing R Extensions covers how to create your own packages,
+        write R help files, and the foreign language (C, C++, Fortran, ...) interfaces.",
+        url="http://cran.r-project.org/doc/manuals/r-release/R-exts.epub");
