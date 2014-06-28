@@ -1,0 +1,41 @@
+dyn.load("rimage2k.dylib");
+
+## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
+## is implementation dependent which library will be used for a given
+## image.
+read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE ...) {
+  if (!(with.imlib2 || with.magickwand)) {
+    complain "can't turn off *both* with.imlib2 *and* with.magickwand"
+  }
+
+  if (@have_imlib2@ && @have_magickwand@) {
+    if (with.imlib2 && with.magickwand) {
+      usemagickwand = FALSE;            # XXX default, sort of
+    } else if (with.imlib2) {
+      usemagickwand = FALSE;
+    } else if (with.magickwand) {
+      usemagickwand = TRUE;
+    }
+  } else if (@have_imlib2@) {
+    if (with.imlib2) {
+      usemagickwand = FALSE;
+    } else {
+      complain "no magickwand, so with.imlib2 can only be true"
+    }
+  } else if (@have_magickwand@) {
+    if (with.magickwand) {
+      usemagickwand = TRUE;
+    } else {
+      complain "no magickwand, so with.imlib2 can only be true"
+    }
+  } else {
+    complain "library build should have failed (neither Imlib2 nor MagickWand available)"
+  }
+
+  im2k <- .External("readimage", file, usemagickwand=usemagickwand);
+
+  pm <- pixmapRGB(c(im2k$red, im2k$green, im2k$blue), nrow=im2k$nr, ncol=im2k$nc);
+}
+
+write.image2k <- function(file, pmap, with.imlib2=TRUE, with.magickwand=TRUE) {
+}
