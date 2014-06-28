@@ -113,7 +113,7 @@ chkcompat(const char *file,
 
 
 static void
-fhw(void *cookie, const char *file,
+fhw(im2k_p im2k, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
@@ -125,7 +125,7 @@ fhw(void *cookie, const char *file,
 
 
 static void
-addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
+addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
 #endif /* 0 */
@@ -144,7 +144,7 @@ addpixel(void *cookie, int i, float red, float green, float blue, float alpha) {
 }
 
 static void
-getpixels(void *cookie, int i,
+getpixels(im2k_p im2k, int i,
           float *pred, float *pgreen, float *pblue, float *palpha) {
     *pred = rmean[i];
     *pgreen = gmean[i];
@@ -165,6 +165,7 @@ main(int argc, char *argv[]) {
     writefile_t writefile;
     int flag2 = 0, flagk = 0;
     int flagx = 0;              /* undocumented, for internal testing */
+    im2k_t im2k;
 
     while ((ch = getopt(argc, argv, "2fko:x")) != -1) {
         switch (ch) {
@@ -258,14 +259,19 @@ main(int argc, char *argv[]) {
             exit(1);
         }
     }
+
+    im2k.fprintf = fprintf;
+    im2k.exit = exit;
+    im2k.malloc = malloc;
+    im2k.cookie = 0;
     while (argc > 0) {
-        (*readfile)(0, argv[0], fhw, addpixel);
+        (*readfile)(&im2k, argv[0], fhw, addpixel);
         argv++;
         argc--;
         nfiles++;
     }
 #ifdef HAVE_IMLIB2
-    (*writefile)(0, oname, hhh, www, depth, getpixels);
+    (*writefile)(&im2k, oname, hhh, www, depth, getpixels);
 #endif /* def HAVE_IMLIB2 */
     return(0);
 }

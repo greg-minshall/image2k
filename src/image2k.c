@@ -116,7 +116,7 @@ image_decode_load_error(Imlib_Load_Error error) {
  * process a file with imlib2
  */
 void
-readfile2(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
+readfile2(im2k_p im2k, const char *file, fhwcall_t dofhw, process_t dopix) {
     Imlib_Image x;              /* imlib2 context */
     DATA32 *data;               /* actual image data */
     int i, val, w, h, len;
@@ -125,9 +125,9 @@ readfile2(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     if (x == NULL) {
         Imlib_Load_Error error_return;
         x = imlib_load_image_with_error_return(file, &error_return);
-        fprintf(stderr, "unable to open \"%s\": %s\n",
-                file, image_decode_load_error(error_return));
-        exit(7);
+        im2k->fprintf(stderr, "unable to open \"%s\": %s\n",
+                      file, image_decode_load_error(error_return));
+        im2k->exit(7);
         /*NOTREACHED*/
     }
     imlib_context_set_image(x);
@@ -136,13 +136,13 @@ readfile2(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     h = imlib_image_get_height();
     len = w*h;
 
-    (dofhw)(cookie, file, h, w, IMLIB2_DEPTH);
+    (dofhw)(im2k, file, h, w, IMLIB2_DEPTH);
 
     data = imlib_image_get_data_for_reading_only();
 
     for (i = 0; i < len; i++) {
         val = data[i];
-        (dopix)(cookie, i,
+        (dopix)(im2k, i,
                 GetR(val)/255.0, GetG(val)/255.0, GetB(val)/255.0, GetA(val)/255.0);
     }
     imlib_free_image_and_decache();
@@ -153,7 +153,7 @@ readfile2(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
  * finish processing with imlib2
  */
 void
-writefile2(void *cookie, const char *ofile, unsigned int hhh,
+writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
            unsigned int www, unsigned int depth, getpixels_t getpixels) {
     int i, r, g, b, a, val, len;
     Imlib_Image outimage;
@@ -161,18 +161,18 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
     Imlib_Load_Error imerr;
 
     if (depth != 8) {
-        fprintf(stderr,
-                "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
+        im2k->fprintf(stderr,
+                      "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
                 __FILE__, __LINE__, depth);
-        exit(8);
+        im2k->exit(8);
         /*NOTREACHED*/
     }
 
     len = hhh*www;
     outdata = (DATA32 *)malloc(len*(sizeof (DATA32)));
     if (outdata == NULL) {
-        fprintf(stderr, "no room for output buffer\n");
-        exit(9);
+        im2k->fprintf(stderr, "no room for output buffer\n");
+        im2k->exit(9);
         /*NOTREACHED*/
     }
 
@@ -180,7 +180,7 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
         val = 0;
         float fr, fg, fb, fa;
 
-        (getpixels)(cookie, i, &fr, &fg, &fb, &fa);
+        (getpixels)(im2k, i, &fr, &fg, &fb, &fa);
         r = fr*255.0;
         g = fg*255.0;
         b = fb*255.0;
@@ -193,17 +193,17 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
     }
     outimage = imlib_create_image_using_data(www, hhh, outdata);
     if (outimage == NULL) {
-        fprintf(stderr, "unable to create output image structures (internal): ");
-        perror("");
-        exit(10);
+        im2k->fprintf(stderr, "unable to create output image structures (internal): ");
+        perror("");             /* XXX */
+        im2k->exit(10);
         /*NOTREACHED*/
     }
     imlib_context_set_image(outimage);    
     imlib_save_image_with_error_return(ofile, &imerr);
     if (imerr != IMLIB_LOAD_ERROR_NONE) {
-        fprintf(stderr, "error saving output file \"%s\": ", ofile);
-        perror("");
-        exit(10);
+        im2k->fprintf(stderr, "error saving output file \"%s\": ", ofile);
+        perror("");             /* XXX */
+        im2k->exit(10);
         /*NOTREACHED*/
     }
     imlib_free_image_and_decache();
@@ -219,21 +219,22 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
  */
 
 static void
-ThrowWandException(MagickWand *wand) {
+ThrowWandException(im2k_p im2k, MagickWand *wand) {
     char *description;
+    char buffer[1000];          /* hopefully big enough */
 
     ExceptionType severity;
 
-    description=MagickGetException(wand,&severity);
-    (void) fprintf(stderr,"%s %s %lu %s\n",GetMagickModule(),description);
-    description=(char *) MagickRelinquishMemory(description);
-    exit(-1);
+    description = MagickGetException(wand,&severity);
+    im2k->fprintf(stderr,"%s %s %lu %s\n", GetMagickModule(), description);
+    description = (char *) MagickRelinquishMemory(description);
+    im2k->exit(-1);
     /*NOTREACHED*/
 }
 
 
 void
-readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
+readfilek(im2k_p im2k, const char *file, fhwcall_t dofhw, process_t dopix) {
     long y;
     MagickBooleanType status;
     MagickPixelPacket pixel;
@@ -249,18 +250,18 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
     image_wand = NewMagickWand();
     status = MagickReadImage(image_wand, file);
     if (status == MagickFalse) {
-        ThrowWandException(image_wand);
+        ThrowWandException(im2k, image_wand);
         /*NOTREACHED*/
     }
     h = MagickGetImageHeight(image_wand);
     w = MagickGetImageWidth(image_wand);
     d = MagickGetImageDepth(image_wand);
 
-    (dofhw)(cookie, file, h, w, d);
+    (dofhw)(im2k, file, h, w, d);
 
     iterator = NewPixelIterator(image_wand);
     if (iterator == (PixelIterator *) NULL) {
-        ThrowWandException(image_wand);
+        ThrowWandException(im2k, image_wand);
         /*NOTREACHED*/
     }
     for (y=0; y < h; y++) {
@@ -270,7 +271,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
         }
         for (x=0; x < (long) width; x++) {
             // PixelGet* returns in range [0,1); we like [0..255]
-            (dopix)(cookie, i,
+            (dopix)(im2k, i,
                     PixelGetRed(pixels[x]),
                     PixelGetGreen(pixels[x]),
                     PixelGetBlue(pixels[x]),
@@ -279,7 +280,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
         }
     }
     if (y < (long) MagickGetImageHeight(image_wand)) {
-        ThrowWandException(image_wand);
+        ThrowWandException(im2k, image_wand);
         /*NOTREACHED*/
     }
     iterator = DestroyPixelIterator(iterator);
@@ -290,7 +291,7 @@ readfilek(void *cookie, const char *file, fhwcall_t dofhw, process_t dopix) {
 // http://members.shaw.ca/el.supremo/MagickWand/grayscale.htm
 
 void
-writefilek(void *cookie, const char *ofile,
+writefilek(im2k_p im2k, const char *ofile,
            unsigned int hhh, unsigned int www,
            unsigned int depth, getpixels_t getpixels) {
     MagickWand *m_wand = NULL;
@@ -303,13 +304,13 @@ writefilek(void *cookie, const char *ofile,
     MagickWandGenesis();
     m_wand = NewMagickWand();
     if (!MagickSetDepth(m_wand, depth)) {
-        ThrowWandException(m_wand);
+        ThrowWandException(im2k, m_wand);
         /*NOTREACHED*/
     }
     p_wand = NewPixelWand();
     PixelSetColor(p_wand, "white");
     if (!MagickNewImage(m_wand, www, hhh, p_wand)) {
-        ThrowWandException(m_wand);
+        ThrowWandException(im2k, m_wand);
         /*NOTREACHED*/
     }
     // Get a new pixel iterator 
@@ -321,7 +322,7 @@ writefilek(void *cookie, const char *ofile,
         // Set the row of wands to a simple gray scale gradient
         for(x = 0; x < www; x++) {
             float red, green, blue, alpha;
-            (getpixels)(cookie, i, &red, &green, &blue, &alpha);
+            (getpixels)(im2k, i, &red, &green, &blue, &alpha);
             PixelSetRed(pixels[x], red);
             PixelSetGreen(pixels[x], green);
             PixelSetBlue(pixels[x], blue);
@@ -332,7 +333,7 @@ writefilek(void *cookie, const char *ofile,
         PixelSyncIterator(iterator);
     }
     if (!MagickWriteImage(m_wand, ofile)) {
-        ThrowWandException(m_wand);
+        ThrowWandException(im2k, m_wand);
         /*NOTREACHED*/
     }
     // Clean up

@@ -78,7 +78,7 @@ chkcompat(const char *file,
 }
 
 static void
-fhw(void *cookie, const char *file,
+fhw(im2k_p im2k, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
@@ -88,7 +88,7 @@ fhw(void *cookie, const char *file,
 }
 
 static void
-output(void *cookie, int i, float fr, float fg, float fb, float fa) {
+output(im2k_p im2k, int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
@@ -117,6 +117,7 @@ main(int argc, char *argv[]) {
     struct stat statbuf;
     readfile_t readfile;
     int flag2 = 0, flagk = 0;
+    im2k_t im2k;
     
     while ((ch = getopt(argc, argv, "2ackl")) != -1) {
         switch (ch) {
@@ -184,6 +185,11 @@ main(int argc, char *argv[]) {
         /*NOTREACHED*/
     }
 
-    (readfile)(0, argv[0], fhw, output);
+    im2k.fprintf = fprintf;
+    im2k.exit = exit;
+    im2k.malloc = malloc;
+    im2k.cookie = 0;
+
+    (readfile)(&im2k, argv[0], fhw, output);
     return(0);
 }

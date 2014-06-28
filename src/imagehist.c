@@ -93,7 +93,7 @@ chkcompat(const char *file,
 }
 
 static void
-fhw(void *cookie, const char *file,
+fhw(im2k_p im2k, const char *file,
     unsigned int height, unsigned int width, unsigned int depth) {
     if (!inited) {
         init(height, width, depth);
@@ -104,7 +104,7 @@ fhw(void *cookie, const char *file,
 
 
 static void
-addhist(void *cookie, int i, float fr, float fg, float fb, float fa) {
+addhist(im2k_p im2k, int i, float fr, float fg, float fb, float fa) {
     unsigned int r, g, b, a;
     unsigned int l;
 
