@@ -165,6 +165,7 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
                 "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
                 __FILE__, __LINE__, depth);
         exit(8);
+        /*NOTREACHED*/
     }
 
     len = hhh*www;
@@ -172,6 +173,7 @@ writefile2(void *cookie, const char *ofile, unsigned int hhh,
     if (outdata == NULL) {
         fprintf(stderr, "no room for output buffer\n");
         exit(9);
+        /*NOTREACHED*/
     }
 
     for (i = 0; i < len; i++) {
