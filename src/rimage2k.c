@@ -297,12 +297,9 @@ rimageread(SEXP args) {
     im2k.malloc = mymalloc;
     im2k.cookie = mp;
 
-    fprintf(stderr, "about to read file %s\n", file);
     /* read in the image, filling in *mp as a side effect */
     (readfile)(&im2k, file, fhw, addpixel);
-    fprintf(stderr, "file read\n");
 
-    fprintf(stderr, "about to create rval\n");
     // now, put together the return: height, width, r, g, b
     rval = PROTECT(list7(PROTECT(ScalarReal(mp->hhh)),    /* 1,2 */
                          PROTECT(ScalarReal(mp->www)),    /* 3 */
@@ -312,7 +309,7 @@ rimageread(SEXP args) {
                          mp->sb,
                          mp->sa));
     protected += 4;
-    fprintf(stderr, "about to create names\n");
+
     names = PROTECT(list7(PROTECT(mkString("nr")),     /* 1,2 */
                           PROTECT(mkString("nc")),     /* 3 */
                           PROTECT(mkString("depth")), /* 4 */
@@ -328,7 +325,6 @@ rimageread(SEXP args) {
 
     UNPROTECT(protected);
 
-    fprintf(stderr, "about to return rval\n");
     return rval;
 }
 
