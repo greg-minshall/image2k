@@ -1,5 +1,39 @@
 ## dyn.load("rimage2k.dylib");
 
+my.pixmapRGB = function(matrixR, matrixG, matrixB, ...)
+{
+  print(dim(matrixR));
+  if ((!all(dim(matrixR) == dim(matrixG))) ||
+      (!all(dim(matrixG) == dim(matrixB)))) {
+    stop("R, G, and B matrices must be of the same size");
+  }
+
+  print("about to call new..pixmap");
+  when <- Sys.time();
+  z = new("pixmapRGB", pixmap(matrixR, ...));
+  print(Sys.time()-when);
+
+  print("about to max");
+  datamax <- max(matrixR, matrixG, matrixB);
+  datamin <- min(matrixR, matrixG, matrixB);
+  print("about to as.numeric");
+#  matrixR <- as.numeric(matrixR);
+#  matrixG <- as.numeric(matrixG);
+#  matrixB <- as.numeric(matrixB);
+  if(datamax>1 || datamin<0) {
+    print("about to normalize");
+    matrixR <- (matrixR - datamin)/(datamax-datamin);
+    matrixG <- (matrixG - datamin)/(datamax-datamin);
+    matrixB <- (matrixB - datamin)/(datamax-datamin);
+  }
+  print("assigning matrices");
+  z@red = matrixR;
+  z@green = matrixG;
+  z@blue = matrixB;
+  print("returning");
+  z
+}
+
 ## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
 ## is implementation dependent which library will be used for a given
 ## image.
@@ -32,18 +66,53 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
     stop("read.image2k: should not occur: neither Imlib2 nor MagickWand available (so, initial install should have failed)");
   }
 
+  print("about to call rimageread");
+  when <- Sys.time();
+
   im2k <- .External("rimageread", file, usemagickwand=usemagickwand);
+
+  print(Sys.time()-when);
   print("about to create array");
+  when <- Sys.time();
+
   rgb <- array(dim=c(im2k$nr, im2k$nc, 3));
+
   print("about to assign ,,1");
+  when <- Sys.time();
+
   rgb[,,1] <- matrix(im2k$red, nrow=im2k$nr, byrow=TRUE);
+
+  print(Sys.time()-when);
   print("about to assign ,,2");
+  when <- Sys.time();
+
   rgb[,,2] <- matrix(im2k$green, nrow=im2k$nr, byrow=TRUE);
+
+  print(Sys.time()-when);
   print("about to assign ,,3");
+  when <- Sys.time();
+
   rgb[,,3] <- matrix(im2k$blue, nrow=im2k$nr, byrow=TRUE);
 
+  print(Sys.time()-when);
+
   print("about to call pixmapRGB");
-  pixmapRGB(rgb);
+  when <- Sys.time();
+
+  pm <- pixmapRGB(rgb);
+
+  print(Sys.time()-when);
+
+  print("about to call myrgb");
+  when <- Sys.time();
+
+  pm <- my.pixmapRGB(matrix(im2k$red, nrow=im2k$nr),
+              matrix(im2k$green, nrow=im2k$nr),
+              matrix(im2k$blue, nrow=im2k$nr));
+
+  print(Sys.time()-when);
+
+  pm;
 }
 
 write.image2k <- function(file, pmap, with.imlib2=TRUE, with.magickwand=TRUE) {
