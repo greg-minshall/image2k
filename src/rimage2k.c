@@ -4,9 +4,14 @@
  */
 
 
-// XXX to create library: R CMD SHLIB -lImlib2 rimlib2.c
-// XXX to see dependencies:  R CMD otool -L rimlib2.dylib
-// XXX to re-do build stuff: autoreconf --install
+/*
+ * XXX to create library:
+ R CMD SHLIB -o rimage2k.dylib librimage2k_la-image2k.o librimage2k_la-rimage2k.o -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI -lImlib2
+ * XXX to see dependencies:
+ R CMD otool -L rimlib2.dylib
+ * XXX to re-do build stuff:
+ autoreconf --install
+*/
 
 #include <strings.h>
 
@@ -82,6 +87,36 @@ void2mytype(void *cookie) {
     }
     return mp;
 }
+
+static int
+myfprintf(FILE * restrict stream, const char *restrict format, ...) {
+    va_list ap;
+
+    va_start(ap, format);
+    if (stream == stderr) {
+        REvprintf(format, ap);
+    } else if (stream == stdout) {
+        Rvprintf(format, ap);
+    } else {
+        /* messy */
+        REprintf("%s:%d: unable to print to correct stream: ", __FILE__, __LINE__);
+        REvprintf(format, ap);
+    }
+    va_end(ap);
+    return(0);                  /* we can't [easily] match the spec... */
+}
+
+static void
+myexit(int status) {
+    error("exiting (%d)\n", status);
+    /*NOTREACHED*/
+}
+
+static void *
+mymalloc(size_t size) {
+    return(R_alloc(size, 1));
+}
+
 
 /* Rinlinedfuns.h:list5++ */
 static SEXP
@@ -257,9 +292,9 @@ rimageread(SEXP args) {
 
     mp = mytypecreate();
 
-    im2k.fprintf = fprintf;
-    im2k.exit = exit;
-    im2k.malloc = malloc;
+    im2k.fprintf = myfprintf;
+    im2k.exit = myexit;
+    im2k.malloc = mymalloc;
     im2k.cookie = mp;
 
     /* read in the image, filling in *mp as a side effect */
