@@ -3,6 +3,8 @@
  * into an R pixmap.
  */
 
+/* XXX should i start at 1?  or, at 0? */
+
 
 /*
  * XXX to create library:
@@ -11,6 +13,14 @@
  R CMD otool -L rimlib2.dylib
  * XXX to re-do build stuff:
  autoreconf --install
+*/
+
+/*
+dyn.load("src/rimage2k.dylib")
+source("src/rimage2k.R")
+source("src/imagemean.R")
+z <- c("/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000010.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000014.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000018.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000011.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000015.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000019.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000012.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000016.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000013.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000017.tif")
+begin <- Sys.time(); zz <- imagemean(z); Sys.time()-begin;
 */
 
 #include <strings.h>
@@ -87,6 +97,26 @@ void2mytype(void *cookie) {
     }
     return mp;
 }
+
+static int
+transposei(mytype_p mp, int i) {
+    int ir, ic, j;
+    static int count = 0;
+
+    ir = i/mp->www;
+    ic = i-(ir*mp->www);
+    j = (ic*mp->hhh)+ir;
+    if (count%1011 == 1) {
+#if 0
+        fprintf(stderr, "www %d, hhh %d, i %d, ir %d, ic %d, j %d\n",
+                mp->www, mp->hhh, i, ir, ic, j);
+#endif /* 0 */
+    }
+    count++;
+    
+    return j;
+}
+
 
 static int
 myfprintf(FILE * restrict stream, const char *restrict format, ...) {
@@ -178,23 +208,32 @@ fhw(im2k_p im2k, const char *file,
 }
 
 
+/*
+ * the odd thing here is that we need to insert the pixel in its
+ * "transposed" position.  this is to keep the R code from having to
+ * convert it to a matrix using "byrow=TRUE".  i.e., all for the sake
+ * of efficiency.
+ */
 static void
 addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
     mytype_p mp = void2mytype(im2k->cookie);
     double *r, *g, *b, *a;
+    int j;
 
     r = REAL(mp->sr);
     g = REAL(mp->sg);
     b = REAL(mp->sb);
     a = REAL(mp->sa);
 
+    j = transposei(mp, i);
+
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
 #endif /* 0 */
-    r[i] = red;
-    g[i] = green;
-    b[i] = blue;
-    a[i] = alpha;
+    r[j] = red;
+    g[j] = green;
+    b[j] = blue;
+    a[j] = alpha;
 }
 
 
