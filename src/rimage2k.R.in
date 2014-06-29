@@ -1,11 +1,11 @@
-dyn.load("rimage2k.dylib");
+## dyn.load("rimage2k.dylib");
 
 ## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
 ## is implementation dependent which library will be used for a given
 ## image.
-read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE ...) {
+read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
   if (!(with.imlib2 || with.magickwand)) {
-    complain "can't turn off *both* with.imlib2 *and* with.magickwand"
+    stop("read.image2k: can't turn off *both* with.imlib2 *and* with.magickwand");
   }
 
   if (@have_imlib2@ && @have_magickwand@) {
@@ -20,25 +20,25 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE ...) {
     if (with.imlib2) {
       usemagickwand = FALSE;
     } else {
-      complain "no magickwand, so with.imlib2 can only be true"
+      stop("read.image2k: with_imlib=FALSE: no magickwand, so with.imlib2 can only be true");
     }
   } else if (@have_magickwand@) {
     if (with.magickwand) {
       usemagickwand = TRUE;
     } else {
-      complain "no magickwand, so with.imlib2 can only be true"
+      stop("read.image2k: with.magick=FALSE: no magickwand, so with.imlib2 can only be true");
     }
   } else {
-    complain "library build should have failed (neither Imlib2 nor MagickWand available)"
+    stop("read.image2k: should not occur: neither Imlib2 nor MagickWand available (so, initial install should have failed)");
   }
 
-  im2k <- .External("readimage", file, usemagickwand=usemagickwand);
+  im2k <- .External("rimageread", file, usemagickwand=usemagickwand);
   rgb <- array(dim=c(im2k$nr, im2k$nc, 3));
   rgb[,,1] <- matrix(im2k$red, nrow=im2k$nr, byrow=TRUE);
   rgb[,,2] <- matrix(im2k$green, nrow=im2k$nr, byrow=TRUE);
   rgb[,,3] <- matrix(im2k$blue, nrow=im2k$nr, byrow=TRUE);
 
-  pm <- pixmapRGB(rgb);
+  pixmapRGB(rgb);
 }
 
 write.image2k <- function(file, pmap, with.imlib2=TRUE, with.magickwand=TRUE) {
