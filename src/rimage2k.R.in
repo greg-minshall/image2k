@@ -33,8 +33,12 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE ...) {
   }
 
   im2k <- .External("readimage", file, usemagickwand=usemagickwand);
+  rgb <- array(dim=c(im2k$nr, im2k$nc, 3));
+  rgb[,,1] <- matrix(im2k$red, nrow=im2k$nr, byrow=TRUE);
+  rgb[,,2] <- matrix(im2k$green, nrow=im2k$nr, byrow=TRUE);
+  rgb[,,3] <- matrix(im2k$blue, nrow=im2k$nr, byrow=TRUE);
 
-  pm <- pixmapRGB(c(im2k$red, im2k$green, im2k$blue), nrow=im2k$nr, ncol=im2k$nc);
+  pm <- pixmapRGB(rgb);
 }
 
 write.image2k <- function(file, pmap, with.imlib2=TRUE, with.magickwand=TRUE) {
