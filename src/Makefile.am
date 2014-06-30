@@ -8,9 +8,8 @@ imagemean_SOURCES = imagemean.c image2k.c
 imagehist_SOURCES = imagehist.c image2k.c
 imagergb_SOURCES = imagergb.c image2k.c
 
+AM_COPT = -g
 AM_CFLAGS = -Wall
-AM_CPPFLAGS = ${IMLIB2_CFLAGS} ${MAGICKWAND_CFLAGS} ${X11_CFLAGS}
-AM_LDFLAGS = ${IMLIB2_LIBS} ${MAGICKWAND_LIBS} ${X11_LIBS}
 
 librimage2k_la_CFLAGS = ${R_CFLAGS} ${AM_CFLAGS}
 librimage2k_la_CPPFLAGS = ${R_CPPFLAGS} ${AM_CPPFLAGS}

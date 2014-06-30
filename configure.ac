@@ -1,4 +1,5 @@
 AC_INIT([imageutils],[0.1])
+AC_CONFIG_AUX_DIR(src/build/autoconf)
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_MACRO_DIR([m4])
@@ -31,14 +32,14 @@ AC_PROG_CPP
 
 have_imlib2=1
 PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], [Have Imlib2])], [have_imlib2=0])
-AC_SUBST(IMLIB2_CFLAGS)
-AC_SUBST(IMLIB2_LIBS)
+CPPFLAGS="${CPPFLAGS} ${IMLIB2_CFLAGS}"
+LIBS="${LIBS} ${IMLIB2_LIBS}"
 AC_SUBST(have_imlib2)
 
 have_magickwand=1
 PKG_CHECK_MODULES([MAGICKWAND], [MagickWand], [AC_DEFINE([HAVE_MAGICKWAND], [1], [Have MagickWand])], [have_magickwand=0])
-AC_SUBST(MAGICKWAND_CFLAGS)
-AC_SUBST(MAGICKWAND_LIBS)
+CPPFLAGS="${CPPFLAGS} ${MAGICKWAND_CFLAGS}"
+LIBS="${LIBS} ${MAGICKWAND_LIBS}"
 AC_SUBST(have_magickwand)
 
 # error if we can find neither Imlib2 nor MagickWand...
@@ -52,9 +53,15 @@ if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
 fi
 
 
-PKG_CHECK_MODULES([X11], [x11])
-AC_SUBST(X11_CFLAGS)
-AC_SUBST(X11_LIBS)
+AC_PATH_X
+if test -n "${x_includes}"; then
+  CPPFLAGS="${CPPFLAGS} -I${x_includes}"
+fi
+if test -n "${x_libraries}"; then
+  LIBS="${LIBS} -L${x_libraries} -lX11"
+else
+  LIBS="${LIBS} -lX11"
+fi
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
