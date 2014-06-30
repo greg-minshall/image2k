@@ -101,6 +101,26 @@ void2mytype(void *cookie) {
 
 
 static int
+transposei(mytype_p mp, int i) {
+    int ir, ic, j;
+    static int count = 0;
+
+    ir = i/mp->www;
+    ic = i-(ir*mp->www);
+    j = (ic*mp->hhh)+ir;
+#if 0
+    if (count%1011 == 1) {      /* i always get this computation wrong... */
+        fprintf(stderr, "www %d, hhh %d, i %d, ir %d, ic %d, j %d\n",
+                mp->www, mp->hhh, i, ir, ic, j);
+    }
+#endif /* 0 */
+    count++;
+    
+    return j;
+}
+
+
+static int
 myfprintf(FILE * restrict stream, const char *restrict format, ...) {
     va_list ap;
 
@@ -149,6 +169,7 @@ list7(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x, SEXP y)
     return s;
 }
 
+
 /*
  * callouts from image2k
  */
@@ -166,10 +187,10 @@ init(mytype_p mp,
     mp->len = mp->www*mp->hhh;
     mp->depth = passed_depth;
 
-    mp->sr = PROTECT(allocMatrix(REALSXP, width, height)); /* 1 */
-    mp->sg = PROTECT(allocMatrix(REALSXP, width, height)); /* 2 */
-    mp->sb = PROTECT(allocMatrix(REALSXP, width, height)); /* 3 */
-    mp->sa = PROTECT(allocMatrix(REALSXP, width, height)); /* 4 */
+    mp->sr = PROTECT(allocMatrix(REALSXP, height, width)); /* 1 */
+    mp->sg = PROTECT(allocMatrix(REALSXP, height, width)); /* 2 */
+    mp->sb = PROTECT(allocMatrix(REALSXP, height, width)); /* 3 */
+    mp->sa = PROTECT(allocMatrix(REALSXP, height, width)); /* 4 */
     mp->rr = REAL(mp->sr);
     mp->rg = REAL(mp->sg);
     mp->rb = REAL(mp->sb);
@@ -200,14 +221,17 @@ fhw(im2k_p im2k, const char *file,
 static void
 addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
     mytype_p mp = void2mytype(im2k->cookie);
+    int j;
+
+    j = transposei(mp, i);
 
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
 #endif /* 0 */
-    mp->rr[i] = red;
-    mp->rg[i] = green;
-    mp->rb[i] = blue;
-    mp->ra[i] = alpha;
+    mp->rr[j] = red;
+    mp->rg[j] = green;
+    mp->rb[j] = blue;
+    mp->ra[j] = alpha;
 }
 
 

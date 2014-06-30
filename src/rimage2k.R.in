@@ -1,32 +1,5 @@
 ## dyn.load("rimage2k.dylib");
 
-my.pixmapRGB = function(matrixR, matrixG, matrixB, ...) {
-  if ((!all(dim(matrixR) == dim(matrixG))) ||
-      (!all(dim(matrixG) == dim(matrixB)))) {
-    stop("R, G, and B matrices must be of the same size");
-  }
-
-  z = new("pixmapRGB", pixmap(matrixR, ...));
-
-  datamax <- max(matrixR, matrixG, matrixB);
-  datamin <- min(matrixR, matrixG, matrixB);
-
-#  matrixR <- as.numeric(matrixR);
-#  matrixG <- as.numeric(matrixG);
-#  matrixB <- as.numeric(matrixB);
-  if(datamax>1 || datamin<0) {
-    matrixR <- (matrixR - datamin)/(datamax-datamin);
-    matrixG <- (matrixG - datamin)/(datamax-datamin);
-    matrixB <- (matrixB - datamin)/(datamax-datamin);
-  }
-
-  z@red = matrixR;
-  z@green = matrixG;
-  z@blue = matrixB;
-
-  z
-}
-
 ## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
 ## is implementation dependent which library will be used for a given
 ## image.
@@ -60,11 +33,29 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
   }
 
   im2k <- .External("rimageread", file=file, usemagickwand=usemagickwand);
+  
+  if ((!all(dim(im2k$red) == dim(im2k$green))) ||
+      (!all(dim(im2k$green) == dim(im2k$blue)))) {
+    stop("R, G, and B matrices must be of the same size");
+  }
 
-  pm <- my.pixmapRGB(im2k$red, im2k$green, im2k$blue);
+  ## duplicate some code from pixmap.R (for efficiency)
+  datamax <- max(im2k$red, im2k$green, im2k$blue);
+  datamin <- min(im2k$red, im2k$green, im2k$blue);
 
-  pm;
+  if(datamax>1 || datamin<0) {
+    im2k$red <- (im2k$red - datamin)/(datamax-datamin);
+    im2k$green <- (im2k$green - datamin)/(datamax-datamin);
+    im2k$blue <- (im2k$blue - datamin)/(datamax-datamin);
+  }
+
+  z = new("pixmapRGB", pixmap(im2k$red, ...));
+  z@red = im2k$red;
+  z@green = im2k$green;
+  z@blue = im2k$blue;
+
+  z
 }
 
-write.image2k <- function(file, pmap, with.imlib2=TRUE, with.magickwand=TRUE) {
+write.image2k <- function(file, pm, with.imlib2=TRUE, with.magickwand=TRUE) {
 }
