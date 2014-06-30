@@ -59,7 +59,7 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
     stop("read.image2k: should not occur: neither Imlib2 nor MagickWand available (so, initial install should have failed)");
   }
 
-  im2k <- .External("rimageread", file, usemagickwand=usemagickwand);
+  im2k <- .External("rimageread", file=file, usemagickwand=usemagickwand);
 
   # cheap matrix tricks (because: for performance, we want to keep
   # copying to a minimum; if we call my.pixmapRGB with vectors, and

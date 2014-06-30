@@ -269,18 +269,19 @@ getpixels(im2k_p im2k, int i,
 
 /* get the list element named str, or return NULL */
 static SEXP
-getListElement(SEXP list, const char *str) {
+getPairListElement(SEXP list, const char *str, const char *cmd) {
     int i;
 
+    list = CDR(list);
     for (i = 0; list != R_NilValue; i++, list = CDR(list)) {
         if (!isNull(TAG(list))) {
-            fprintf(stderr, "%s\n", CHAR(PRINTNAME(TAG(list))));
             if (strcmp(CHAR(PRINTNAME(TAG(list))), str) == 0) {
                 return CAR(list);
             }
         }
     }
-    return R_NilValue;
+    error("%s: required parameter '%s' not specified", cmd, str);
+    /*NOTREACHED*/
 }
 
 
@@ -302,17 +303,12 @@ rimageread(SEXP args) {
     im2k_t im2k;
 
     /* first, get file name */
+    file = CHAR(STRING_ELT(getPairListElement(args, "file", "rimageread"), 0));
 
     /* second, get library to use */
-    usemagick = LOGICAL(getListElement(args, "usemagickwand"))[0];
+    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "rimageread"))[0];
     if (usemagick == NA_LOGICAL) {
         error("'usemagickwand' must be TRUE or FALSE");
-    }
-
-    file = CHAR(getListElement(args, "file"));
-    fprintf(stderr, "got file\n");
-    if (file == CHAR(R_NilValue)) {
-        error("'file' must be specified");
     }
 
     /* now, which should we use, Imlib2 or MagicWand? */
