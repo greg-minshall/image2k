@@ -267,16 +267,13 @@ getpixels(im2k_p im2k, int i,
  * pairlists.
  */
 
-/* get the list element named str, or return NULL */
+/* get the list element named str, or report an error() */
 static SEXP
-getPairListElement(SEXP list, const char *str, const char *cmd) {
-    int i;
-
-    list = CDR(list);
-    for (i = 0; list != R_NilValue; i++, list = CDR(list)) {
-        if (!isNull(TAG(list))) {
-            if (strcmp(CHAR(PRINTNAME(TAG(list))), str) == 0) {
-                return CAR(list);
+getPairListElement(SEXP pairs, const char *str, const char *cmd) {
+    for (pairs = CDR(pairs); pairs != R_NilValue; pairs = CDR(pairs)) {
+        if (!isNull(TAG(pairs))) {
+            if (strcmp(CHAR(PRINTNAME(TAG(pairs))), str) == 0) {
+                return CAR(pairs);
             }
         }
     }
