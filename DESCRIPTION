@@ -1,0 +1,15 @@
+Package: image2k
+Type: Package
+Title: interface between pixmap and Imlib2 and/or MagickWand
+Version: 1.0
+Date: 2014-06-24
+Author: Greg Minshall
+Maintainer: Greg Minshall <minshall@acm.org>
+Description: image2k creates pixmaps from any image file that is
+  supported by the Imlib2 and/or MagickWand libraries (assuming one or
+  both of these libraries are available on your machine).  similarly,
+  given a pixmap, image2k can write that to an image file using either
+  Imlib2 and/or MagickWand.  (MagickWand is an optional library from
+  ImageMagick.)
+License: MIT
+Depends: pixmap

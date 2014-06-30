@@ -1,8 +1,8 @@
 AC_INIT([imageutils],[0.1])
-AC_CONFIG_AUX_DIR(src/build/autoconf)
+AC_CONFIG_AUX_DIR(build-aux)
+AC_CONFIG_MACRO_DIR([build-aux/m4])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_AR
 LT_INIT
 
@@ -67,7 +67,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
-        src/rimage2k.R
+        R/rimage2k.R
 ])
 
 AC_OUTPUT

@@ -1,0 +1,2 @@
+export(read.image2k, write.image2k)
+useDynLib(rimage2k, .registration=TRUE)
