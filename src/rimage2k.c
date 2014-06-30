@@ -16,10 +16,15 @@
 */
 
 /*
+
+library(pixmap)
 dyn.load("src/rimage2k.dylib")
 source("src/rimage2k.R")
 source("src/imagemean.R")
 z <- system("ls ~/NOTBACKEDUP/sensorproblem/tifs/L100001?.tif", TRUE)
+begin <- Sys.time(); zz <- imagemean("data/c-L1001745.png"); Sys.time()-begin;
+write.image2k(file="xx.png", zz)
+
 begin <- Sys.time(); zz <- imagemean(z); Sys.time()-begin;
 */
 
@@ -150,25 +155,6 @@ mymalloc(size_t size) {
 }
 
 
-/* Rinlinedfuns.h:list5++ */
-static SEXP
-list6(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x)
-{
-    PROTECT(s);
-    s = CONS(s, list5(t, u, v, w, x));
-    UNPROTECT(1);
-    return s;
-}
-
-static SEXP
-list7(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x, SEXP y)
-{
-    PROTECT(s);
-    s = CONS(s, list6(t, u, v, w, x, y));
-    UNPROTECT(1);
-    return s;
-}
-
 
 /*
  * callouts from image2k
@@ -235,28 +221,19 @@ addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
 }
 
 
-#if 0
 static void
 getpixels(im2k_p im2k, int i,
           float *pred, float *pgreen, float *pblue, float *palpha) {
     mytype_p mp = void2mytype(im2k->cookie);
+    int j;
 
-    // now, map data, copy it to the R structure, and free it
-    data = imlib_image_get_data_for_reading_only();
-    for (i = 0; i < bytes; i++) {
-        val = data[i];
-        r[i] = GetR(val);
-        g[i] = GetG(val);
-        b[i] = GetB(val);
-    }
-    imlib_free_image_and_decache();
+    j = transposei(mp, i);
 
-    *pred = mp->rpixels[i];
-    *pgreen = mp->gpixels[i];
-    *pblue = mp->bpixels[i];
-    *palpha = mp->apixels[i];
+    *pred = mp->rr[j];
+    *pgreen = mp->rg[j];
+    *pblue = mp->rb[j];
+    *palpha = 0xff;             /* XXX */
 }
-#endif
 
 
 /*
@@ -333,23 +310,19 @@ rimageread(SEXP args) {
     (readfile)(&im2k, file, fhw, addpixel);
 
     // now, put together the return: height, width, r, g, b
-    rval = PROTECT(list7(PROTECT(ScalarReal(mp->hhh)),    /* 1,2 */
-                         PROTECT(ScalarReal(mp->www)),    /* 3 */
-                         PROTECT(ScalarReal(mp->depth)), /* 4 */
+    rval = PROTECT(list5(PROTECT(ScalarReal(mp->depth)), /* 1,2 */
                          mp->sr,
                          mp->sg,
                          mp->sb,
                          mp->sa));
-    protected += 4;
+    protected += 2;
 
-    names = PROTECT(list7(PROTECT(mkString("nr")),     /* 1,2 */
-                          PROTECT(mkString("nc")),     /* 3 */
-                          PROTECT(mkString("depth")), /* 4 */
-                          PROTECT(mkString("red")),    /* 5 */
-                          PROTECT(mkString("green")),  /* 6 */
-                          PROTECT(mkString("blue")),   /* 7 */
-                          PROTECT(mkString("alpha")))); /* 8 */
-    protected += 8;
+    names = PROTECT(list5(PROTECT(mkString("depth")),   /* 1,2 */
+                          PROTECT(mkString("red")),     /* 3 */
+                          PROTECT(mkString("green")),   /* 4 */
+                          PROTECT(mkString("blue")),    /* 5 */
+                          PROTECT(mkString("alpha")))); /* 6 */
+    protected += 6;
     namesgets(rval, names);
 
     protected += mp->protected;
@@ -361,19 +334,82 @@ rimageread(SEXP args) {
 }
 
 /*
- * given the characteristics and data of an image, write it out to the
- * given file name
+ * given the red, green, and blue channels of an image, and the
+ * desired depth, write it out to the given file name.
  */
 static SEXP
 rimagewrite(SEXP args) {
-#if 0
     const char *file;
-    SEXP xfile, rval, names;
     mytype_p mp;
+    int usemagick;
+    int protected = 0;          /* for UNPROTECT */
     writefile_t writefile;
-    int bytes, protected = 0;
-#endif /* 0 */
-    return(0);                  /* XXX */
+    im2k_t im2k;
+
+    /* first, get file name */
+    file = CHAR(STRING_ELT(getPairListElement(args, "file", "rimageread"), 0));
+
+    /* second, get library to use */
+    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "rimageread"))[0];
+    if (usemagick == NA_LOGICAL) {
+        error("'usemagickwand' must be TRUE or FALSE");
+    }
+
+    /* now, which should we use, Imlib2 or MagicWand? */
+#if defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND)
+    if (usemagick) {
+        writefile = writefilek;
+    } else {
+        writefile = writefile2;
+    }
+#elif defined(HAVE_IMLIB2)
+    writefile = writefile2;
+#elif defined(HAVE_MAGICKWAND)
+    writefile = writefilek;
+#else
+// this should not occur!
+#error Need Imlib2 or ImageMagick -- neither defined at compilation time
+#endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
+    mp = mytypecreate();
+
+    mp->sr = getPairListElement(args, "red", "rimagewrite");
+    mp->sg = getPairListElement(args, "green", "rimatewrite");
+    mp->sb = getPairListElement(args, "blue", "rimagewrite");
+
+    if ((!isMatrix(mp->sr)) || (!isMatrix(mp->sg)) || (!isMatrix(mp->sb))) {
+        error("rimagewrite: the red, green, and blue parameters must be matrices");
+        /*NOTREACHED*/
+    }
+
+    if ((nrows(mp->sr) != nrows(mp->sg)) || (nrows(mp->sg) != nrows(mp->sb)) ||
+        (ncols(mp->sr) != ncols(mp->sg)) || (ncols(mp->sg) != ncols(mp->sb))) {
+        error("rimagewrite: the red, green, and blue matrices must have the same dimensions");
+        /*NOTREACHED*/
+    }
+
+    mp->hhh = nrows(mp->sr);
+    mp->www = ncols(mp->sr);
+
+    mp->depth = REAL(getPairListElement(args, "depth", "rimagewrite"))[0];
+
+    mp->rr = REAL(mp->sr);
+    mp->rg = REAL(mp->sg);
+    mp->rb = REAL(mp->sb);
+
+    im2k.fprintf = myfprintf;
+    im2k.exit = myexit;
+    im2k.malloc = mymalloc;
+    im2k.cookie = mp;
+
+    /* write out the image */
+    (writefile)(&im2k, file, mp->hhh, mp->www, mp->depth, getpixels);
+
+    protected += mp->protected;
+    mytypedestroy(mp);
+
+    UNPROTECT(protected);
+
+    return R_NilValue;
 }
 
 /* R glue */

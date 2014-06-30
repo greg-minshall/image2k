@@ -1,9 +1,6 @@
 ## dyn.load("rimage2k.dylib");
 
-## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
-## is implementation dependent which library will be used for a given
-## image.
-read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
+calc.usemagickwand <- function(with.imlib2, with.magickwand) {
   if (!(with.imlib2 || with.magickwand)) {
     stop("read.image2k: can't turn off *both* with.imlib2 *and* with.magickwand");
   }
@@ -31,6 +28,15 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
   } else {
     stop("read.image2k: should not occur: neither Imlib2 nor MagickWand available (so, initial install should have failed)");
   }
+  usemagickwand;
+}
+
+## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
+## is implementation dependent which library will be used for a given
+## image.
+read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
+  usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
+                                      with.magickwand=with.magickwand);
 
   im2k <- .External("rimageread", file=file, usemagickwand=usemagickwand);
   
@@ -57,5 +63,12 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
   z
 }
 
-write.image2k <- function(file, pm, with.imlib2=TRUE, with.magickwand=TRUE) {
+write.image2k <- function(file, pm, depth=8,
+                          with.imlib2=TRUE, with.magickwand=TRUE) {
+  usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
+                                      with.magickwand=with.magickwand);
+
+  .External("rimagewrite", file=file,
+            red=pm@red, green=pm@green, blue=pm@blue,
+            depth=depth, usemagickwand=usemagickwand);
 }
