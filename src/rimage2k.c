@@ -54,6 +54,7 @@ typedef struct {
     int protected;              /* how many R variables are PROTECTED
                                  * here */
     SEXP sr, sg, sb, sa;        /* arrays of red, green, blue, and alpha */
+    double *rr, *rg, *rb, *ra;  /* pointers into sr, sg, sb, sa */
     int inited;
 } mytype_t, *mytype_p;
 #define MYTYPE_ID "image2k"
@@ -96,25 +97,6 @@ void2mytype(void *cookie) {
         /*NOTREACHED*/
     }
     return mp;
-}
-
-static int
-transposei(mytype_p mp, int i) {
-    int ir, ic, j;
-    static int count = 0;
-
-    ir = i/mp->www;
-    ic = i-(ir*mp->www);
-    j = (ic*mp->hhh)+ir;
-#if 0
-    if (count%1011 == 1) {      /* i always get this computation wrong... */
-        fprintf(stderr, "www %d, hhh %d, i %d, ir %d, ic %d, j %d\n",
-                mp->www, mp->hhh, i, ir, ic, j);
-    }
-#endif /* 0 */
-    count++;
-    
-    return j;
 }
 
 
@@ -178,19 +160,20 @@ list7(SEXP s, SEXP t, SEXP u, SEXP v, SEXP w, SEXP x, SEXP y)
 static void
 init(mytype_p mp,
      unsigned int height, unsigned int width, unsigned int passed_depth) {
-    int bytes;
 
     mp->hhh = height;
     mp->www = width;
     mp->len = mp->www*mp->hhh;
     mp->depth = passed_depth;
 
-    bytes = mp->www*mp->hhh;
-
-    mp->sr = PROTECT(allocVector(REALSXP, bytes)); /* 1 */
-    mp->sg = PROTECT(allocVector(REALSXP, bytes)); /* 2 */
-    mp->sb = PROTECT(allocVector(REALSXP, bytes)); /* 3 */
-    mp->sa = PROTECT(allocVector(REALSXP, bytes)); /* 4 */
+    mp->sr = PROTECT(allocMatrix(REALSXP, width, height)); /* 1 */
+    mp->sg = PROTECT(allocMatrix(REALSXP, width, height)); /* 2 */
+    mp->sb = PROTECT(allocMatrix(REALSXP, width, height)); /* 3 */
+    mp->sa = PROTECT(allocMatrix(REALSXP, width, height)); /* 4 */
+    mp->rr = REAL(mp->sr);
+    mp->rg = REAL(mp->sg);
+    mp->rb = REAL(mp->sb);
+    mp->ra = REAL(mp->sa);
 
     mp->protected += 4;
 
@@ -217,23 +200,14 @@ fhw(im2k_p im2k, const char *file,
 static void
 addpixel(im2k_p im2k, int i, float red, float green, float blue, float alpha) {
     mytype_p mp = void2mytype(im2k->cookie);
-    double *r, *g, *b, *a;
-    int j;
-
-    r = REAL(mp->sr);
-    g = REAL(mp->sg);
-    b = REAL(mp->sb);
-    a = REAL(mp->sa);
-
-    j = transposei(mp, i);
 
 #if 0
     fprintf(stderr, "%d %f %f %f %f\n", i, red, green, blue, alpha);
 #endif /* 0 */
-    r[j] = red;
-    g[j] = green;
-    b[j] = blue;
-    a[j] = alpha;
+    mp->rr[i] = red;
+    mp->rg[i] = green;
+    mp->rb[i] = blue;
+    mp->ra[i] = alpha;
 }
 
 

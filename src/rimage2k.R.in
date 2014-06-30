@@ -61,13 +61,6 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
 
   im2k <- .External("rimageread", file=file, usemagickwand=usemagickwand);
 
-  # cheap matrix tricks (because: for performance, we want to keep
-  # copying to a minimum; if we call my.pixmapRGB with vectors, and
-  # *it* turns the vectors into matrices, we incur a copy)
-  dims <- c(im2k$nr, im2k$nc);
-  dim(im2k$red) <- dims;
-  dim(im2k$green) <- dims;
-  dim(im2k$blue) <- dims;
   pm <- my.pixmapRGB(im2k$red, im2k$green, im2k$blue);
 
   pm;
