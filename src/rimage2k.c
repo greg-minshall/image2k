@@ -263,24 +263,24 @@ getpixels(im2k_p im2k, int i,
 
 /*
  * from "Writing R Extensions" (in turn said to be based on a similar
- * routine in the package stats)
+ * routine in the package stats), though this is modified to deal with
+ * pairlists.
  */
 
 /* get the list element named str, or return NULL */
-SEXP getListElement(SEXP list, const char *str)
-{
-    SEXP
-        elmt = R_NilValue,
-        names = getAttrib(list, R_NamesSymbol);
+static SEXP
+getListElement(SEXP list, const char *str) {
     int i;
 
-    for (i = 0; i < length(list); i++) {
-	if(strcmp(CHAR(STRING_ELT(names, i)), str) == 0) {
-	   elmt = VECTOR_ELT(list, i);
-	   break;
-	}
+    for (i = 0; list != R_NilValue; i++, list = CDR(list)) {
+        if (!isNull(TAG(list))) {
+            fprintf(stderr, "%s\n", CHAR(PRINTNAME(TAG(list))));
+            if (strcmp(CHAR(PRINTNAME(TAG(list))), str) == 0) {
+                return CAR(list);
+            }
+        }
     }
-    return elmt;
+    return R_NilValue;
 }
 
 
@@ -294,7 +294,7 @@ SEXP getListElement(SEXP list, const char *str)
 static SEXP
 rimageread(SEXP args) {
     const char *file;
-    SEXP xfile, rval, names;
+    SEXP rval, names;
     mytype_p mp;
     readfile_t readfile;
     int protected = 0;
@@ -303,14 +303,16 @@ rimageread(SEXP args) {
 
     /* first, get file name */
 
-    xfile = PROTECT(coerceVector(CADR(args), STRSXP)); /* 1 */
-    protected++;
-    file = CHAR(STRING_ELT(xfile, 0));
-
     /* second, get library to use */
-    usemagick = asLogical(CADDR(args));
+    usemagick = LOGICAL(getListElement(args, "usemagickwand"))[0];
     if (usemagick == NA_LOGICAL) {
         error("'usemagickwand' must be TRUE or FALSE");
+    }
+
+    file = CHAR(getListElement(args, "file"));
+    fprintf(stderr, "got file\n");
+    if (file == CHAR(R_NilValue)) {
+        error("'file' must be specified");
     }
 
     /* now, which should we use, Imlib2 or MagicWand? */
@@ -367,6 +369,10 @@ rimageread(SEXP args) {
     return rval;
 }
 
+/*
+ * given the characteristics and data of an image, write it out to the
+ * given file name
+ */
 static SEXP
 rimagewrite(SEXP args) {
 #if 0
