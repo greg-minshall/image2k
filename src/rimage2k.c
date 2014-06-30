@@ -19,7 +19,7 @@
 dyn.load("src/rimage2k.dylib")
 source("src/rimage2k.R")
 source("src/imagemean.R")
-z <- c("/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000010.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000014.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000018.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000011.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000015.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000019.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000012.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000016.tif", "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000013.tif",    "/Users/minshall/NOTBACKEDUP/sensorproblem/tifs/L1000017.tif")
+z <- system("ls ~/NOTBACKEDUP/sensorproblem/tifs/L100001?.tif", TRUE)
 begin <- Sys.time(); zz <- imagemean(z); Sys.time()-begin;
 */
 
