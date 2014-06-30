@@ -106,12 +106,12 @@ transposei(mytype_p mp, int i) {
     ir = i/mp->www;
     ic = i-(ir*mp->www);
     j = (ic*mp->hhh)+ir;
-    if (count%1011 == 1) {
 #if 0
+    if (count%1011 == 1) {      /* i always get this computation wrong... */
         fprintf(stderr, "www %d, hhh %d, i %d, ir %d, ic %d, j %d\n",
                 mp->www, mp->hhh, i, ir, ic, j);
-#endif /* 0 */
     }
+#endif /* 0 */
     count++;
     
     return j;
