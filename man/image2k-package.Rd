@@ -43,7 +43,7 @@ add-on package
 allows a pixmap image to be created from
 \href{https://en.wikipedia.org/wiki/Tagged_Image_File_Format}{TIFF}
 files (through the use of the
-\href{http://www.remotesensing.org/libtiff/} library}{libtiff).  Both
+\href{http://www.remotesensing.org/libtiff/}{libtiff} library).  Both
 pixmap and rtiff have other functions.
 
 Image2k is another add-on to pixmap, and adds the ability to read or
@@ -58,8 +58,9 @@ for this to be possible.)
 \code{read.image2k} reads an image file, and returns a pixmapRGB with
 that files contents in it.
 
-\code{write.image2kwrite} attempts to write the image contained in pm to the
-image file.
+\code{write.image2kwrite} attempts to write the image contained in pm to
+the image file.  the depth of the image (default \code{8}) can be
+specified.
 
 note that image file formats are determined (by whichever of the Imlib2
 or MagickWand libraries is called) based on the filename extension.  so,
@@ -67,7 +68,7 @@ a file of foo.jpg would be assumed to be a JPEG file.
 
 the with_imlib2 and with_magickwand parameters each default to TRUE.  in
 this case, assuming the system has both libraries installed, image2k
-makes an independent decision of which library to use, and sticks with
+makes an arbitrary decision of which library to use, and sticks with
 that decision.  (I.e., it is *NOT* the case that image2k first tries one
 library and, should that one fail, switches over to the other library.)
 
