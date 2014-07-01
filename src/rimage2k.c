@@ -265,7 +265,7 @@ getPairListElement(SEXP pairs, const char *str, const char *cmd) {
 /* usage: rimageread(char *filename, bool usemagickwand); */
 
 static SEXP
-rimageread(SEXP args) {
+rimage2kread(SEXP args) {
     const char *file;
     SEXP rval, names;
     mytype_p mp;
@@ -338,7 +338,7 @@ rimageread(SEXP args) {
  * desired depth, write it out to the given file name.
  */
 static SEXP
-rimagewrite(SEXP args) {
+rimage2kwrite(SEXP args) {
     const char *file;
     mytype_p mp;
     int usemagick;
@@ -412,22 +412,45 @@ rimagewrite(SEXP args) {
     return R_NilValue;
 }
 
-/* R glue */
+/*
+ * allow the R code to find out how we are configured/compliled.
+ * (originally, i had a rimage2k.R.in file, but when i moved
+ * configure.ac to src/configure.ac, i was unhappy with having to
+ * modify a file in ../R, so decided to do this.)
+ */
 
-static const
-R_ExternalMethodDef externalMethods[] = {
-   {"rimageread",  (DL_FUNC) &rimageread, -1},
-   {"rimagewrite",  (DL_FUNC) &rimagewrite, -1},
-   {NULL}
-};
+static SEXP
+rimage2khavemagickwand(SEXP args) {
+#if defined(HAVE_MAGICKWAND)
+    return ScalarLogical(1);
+#else  /* defined(HAVE_MAGICKWAND) */
+    return ScalarLogical(0);
+#endif  /* defined(HAVE_MAGICKWAND) */
+}
+
+static SEXP
+rimage2khaveimlib2(SEXP args) {
+#if defined(HAVE_IMLIB2)
+    return ScalarLogical(1);
+#else  /* defined(HAVE_IMLIB2) */
+    return ScalarLogical(0);
+#endif  /* defined(HAVE_IMLIB2) */
+}
+
+/* R glue */
 
 void R_init_rimage2k(DllInfo *info)
 {
- /* Register the .External routine.
-  * No .C, .Call, or Fortran routines,
-  * so pass those arrays as NULL.
-  */
- R_registerRoutines(info,
-                    NULL, NULL,
-                    NULL, externalMethods);
+    static const R_ExternalMethodDef externalMethods[] = {
+        {"image2kread",  (DL_FUNC) &rimage2kread, -1},
+        {"image2kwrite",  (DL_FUNC) &rimage2kwrite, -1},
+        {"image2khavemagickwand", (DL_FUNC) &rimage2khavemagickwand, 0},
+        {"image2khaveimlib2", (DL_FUNC) &rimage2khaveimlib2, 0},
+        {NULL}
+    };
+    /* Register the .External routine.
+     * No .C, .Call, or Fortran routines,
+     * so pass those arrays as NULL.
+     */
+    R_registerRoutines(info, NULL, NULL, NULL, externalMethods);
 }

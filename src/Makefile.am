@@ -16,3 +16,7 @@ librimage2k_la_CPPFLAGS = ${R_CPPFLAGS} ${AM_CPPFLAGS}
 librimage2k_la_LDFLAGS = ${R_LDFLAGS} ${AM_LDFLAGS}
 librimage2k_la_CC = ${R_CC}
 
+# keep libtoolize happy...
+# https://trac.transmissionbt.com/ticket/1335
+
+ACLOCAL_AMFLAGS = -Ibuild-aux/m4

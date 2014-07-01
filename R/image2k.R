@@ -1,11 +1,14 @@
 ## dyn.load("rimage2k.dylib");
 
 calc.usemagickwand <- function(with.imlib2, with.magickwand) {
+  have_imlib2 = ..External("image2khaveimlib2");
+  have_magickwand = ..External("image2khavemagickwand");
+  
   if (!(with.imlib2 || with.magickwand)) {
     stop("read.image2k: can't turn off *both* with.imlib2 *and* with.magickwand");
   }
 
-  if (@have_imlib2@ && @have_magickwand@) {
+  if (have_imlib2 && have_magickwand) {
     if (with.imlib2 && with.magickwand) {
       usemagickwand = FALSE;            # XXX default, sort of
     } else if (with.imlib2) {
@@ -13,13 +16,13 @@ calc.usemagickwand <- function(with.imlib2, with.magickwand) {
     } else if (with.magickwand) {
       usemagickwand = TRUE;
     }
-  } else if (@have_imlib2@) {
+  } else if (have_imlib2) {
     if (with.imlib2) {
       usemagickwand = FALSE;
     } else {
       stop("read.image2k: with_imlib=FALSE: no magickwand, so with.imlib2 can only be true");
     }
-  } else if (@have_magickwand@) {
+  } else if (have_magickwand) {
     if (with.magickwand) {
       usemagickwand = TRUE;
     } else {
@@ -38,7 +41,7 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
   usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
                                       with.magickwand=with.magickwand);
 
-  im2k <- .External("rimageread", file=file, usemagickwand=usemagickwand);
+  im2k <- .External("image2kread", file=file, usemagickwand=usemagickwand);
   
   if ((!all(dim(im2k$red) == dim(im2k$green))) ||
       (!all(dim(im2k$green) == dim(im2k$blue)))) {
@@ -68,7 +71,7 @@ write.image2k <- function(file, pm, depth=8,
   usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
                                       with.magickwand=with.magickwand);
 
-  .External("rimagewrite", file=file,
+  .External("image2kwrite", file=file,
             red=pm@red, green=pm@green, blue=pm@blue,
             depth=depth, usemagickwand=usemagickwand);
 }

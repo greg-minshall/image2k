@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AM_PROG_AR
 LT_INIT
 
-AC_CONFIG_SRCDIR([src])
+AC_CONFIG_SRCDIR([image2k.c])
 
 # from Writing R Extensions: get the right compiler and flags
 : ${R_HOME=`R RHOME`}
@@ -66,8 +66,6 @@ fi
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
         Makefile
-        src/Makefile
-        R/rimage2k.R
 ])
 
 AC_OUTPUT
