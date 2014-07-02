@@ -16,6 +16,19 @@
 */
 
 /*
+ R CMD SHLIB -o rimage2k.dylib librimage2k_la-image2k.o
+ librimage2k_la-rimage2k.o -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI
+ -lImlib2 ; flag-sort -r gcc -ffor-scope -dynamiclib
+ -Wl,-headerpad_max_install_names -undefined dynamic_lookup
+ -single_module -multiply_defined suppress -L/sw/lib -o rimage2k.dylib
+ librimage2k_la-image2k.o librimage2k_la-rimage2k.o
+ -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI -lImlib2
+ -L/sw/Library/Frameworks/R.framework/Versions/3.0/Resources/lib -lR
+ -lintl -Wl,-framework -Wl,CoreFoundation;
+
+*/
+
+/*
 
 library(pixmap)
 dyn.load("src/rimage2k.dylib")
@@ -439,7 +452,7 @@ rimage2khaveimlib2(SEXP args) {
 
 /* R glue */
 
-void R_init_rimage2k(DllInfo *info)
+void R_init_image2k(DllInfo *info)
 {
     static const R_ExternalMethodDef externalMethods[] = {
         {"image2kread",  (DL_FUNC) &rimage2kread, -1},

@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AM_PROG_AR
 LT_INIT
 
-AC_CONFIG_SRCDIR([image2k.c])
+AC_CONFIG_SRCDIR([src/image2k.c])
 
 # from Writing R Extensions: get the right compiler and flags
 : ${R_HOME=`R RHOME`}
@@ -32,12 +32,16 @@ AC_PROG_CPP
 
 have_imlib2=1
 PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], [Have Imlib2])], [have_imlib2=0])
+AC_SUBST(IMLIB2_CFLAGS)
+AC_SUBST(IMLIB2_LIBS)
 CPPFLAGS="${CPPFLAGS} ${IMLIB2_CFLAGS}"
 LIBS="${LIBS} ${IMLIB2_LIBS}"
 AC_SUBST(have_imlib2)
 
 have_magickwand=1
 PKG_CHECK_MODULES([MAGICKWAND], [MagickWand], [AC_DEFINE([HAVE_MAGICKWAND], [1], [Have MagickWand])], [have_magickwand=0])
+AC_SUBST(MAGICKWAND_CFLAGS)
+AC_SUBST(MAGICKWAND_LIBS)
 CPPFLAGS="${CPPFLAGS} ${MAGICKWAND_CFLAGS}"
 LIBS="${LIBS} ${MAGICKWAND_LIBS}"
 AC_SUBST(have_magickwand)
@@ -55,17 +59,23 @@ fi
 
 AC_PATH_X
 if test -n "${x_includes}"; then
+  X_CFLAGS="-I${x_includes}"
+  AC_SUBST(X_CFLAGS)
   CPPFLAGS="${CPPFLAGS} -I${x_includes}"
 fi
 if test -n "${x_libraries}"; then
+  X_LIBS="-L${x_libraries} -lX11"
+  AC_SUBST(X_LIBS)
   LIBS="${LIBS} -L${x_libraries} -lX11"
 else
   LIBS="${LIBS} -lX11"
 fi
 
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
         Makefile
+        src/Makefile
+        src/Makevars
 ])
 
 AC_OUTPUT

@@ -17,6 +17,8 @@ configure
 libtool
 R/rimage2k.R
 src/.libs
+src/Makevars
+src/Makevars.in
 src/image2k.o
 src/imagehist.o
 src/imagehist
@@ -26,5 +28,6 @@ src/imagergb.o
 src/imagergb
 src/librimage2k.la
 src/librimage2k_la*
-src/rimage2k.dylib
+src/image2k.dylib
+src/rimage2k.o
 stamp-h1

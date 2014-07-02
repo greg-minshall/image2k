@@ -1,4 +1,4 @@
-## dyn.load("rimage2k.dylib");
+## dyn.load("image2k.dylib");
 
 calc.usemagickwand <- function(with.imlib2, with.magickwand) {
   have_imlib2 = ..External("image2khaveimlib2");
