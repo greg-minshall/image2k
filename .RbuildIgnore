@@ -1,8 +1,6 @@
 ^\.RbuildIgnore$
 ^\.deps$
 ^README.org$
-^config.*$
-^Makefile.*$
 ^src/\.libs$
 ^src/autom4te.cache$
 ^src/build-aux$
@@ -13,5 +11,3 @@
 ^src/imagemean$
 ^src/imagehist$
 ^src/imagergb$
-^config.*$
-^src/Makefile.*$
