@@ -1,28 +1,25 @@
-setMethod("+", signature(e1="pixmap", e2="pixmap"),
-function(e1, e2) {
+chkcompat <- function(pm1, pm2) {
   ## make sure the images have the same channels
-  if (!all(e1@channels == e2@channels)) {
+  if (!all(pm1@channels == pm2@channels)) {
     stop("images have different color channels: \"%s\" versus \"%s\"",
-         sprintf("%s ", e1@channels), sprintf("%s ", e2@channels));
+         sprintf("%s ", pm1@channels), sprintf("%s ", pm2@channels));
   }
   ## make sure the images have the same size
-  if (!all(e1@size == e2@size)) {
+  if (!all(pm1@size == pm2@size)) {
     stop(sprintf("images have different sizes: %dx%d versus %dx%d",
-                 e1@size[1], e1@size[2], e2@size[1], e2@size[2]));
+                 pm1@size[1], pm1@size[2], pm2@size[1], pm2@size[2]));
   }
-
-  for (chan in e1@channels) {
-    slot(e1, chan) = slot(e1, chan) + slot(e2, chan);
-  }
-
-  e1
-})
+}
 
 
-imagemean <- function(file, ..., with.imlib2=TRUE, with.magickwand=TRUE) {
+imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE) {
   ##  flatten input.  file may have been specified c(file1, file2,
   ## ...), and this will take care of that
   files <- c(file, ...);
+
+  if ((!missing(output)) && file.exists(output)) {
+    stop(sprintf("attempt to overwrite an existing file: %s", output));
+  }
 
   nfiles = 0;
   for (f in files) {
@@ -30,7 +27,10 @@ imagemean <- function(file, ..., with.imlib2=TRUE, with.magickwand=TRUE) {
     if (nfiles == 0) {
       sum <- pm;
     } else {
-      sum <- sum + pm;
+      ## add everything up
+      for (chan in sum@channels) {
+        slot(sum, chan) = slot(sum, chan) + slot(pm, chan);
+      }
     }
     nfiles = nfiles+1;
   }
@@ -39,5 +39,9 @@ imagemean <- function(file, ..., with.imlib2=TRUE, with.magickwand=TRUE) {
     slot(sum, chan) = slot(sum, chan)/nfiles;
   }
 
-  sum;
+  if (missing(output)) {
+    return(sum);
+  } else {
+    write.image2k(output, pm);
+  }
 }
