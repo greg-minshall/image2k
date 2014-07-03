@@ -19,8 +19,8 @@ write.image2k(file, pm, depth=8, with.imlib2=TRUE, with.magickwand=TRUE)
 }
 \arguments{
   \item{file}{pathname of file to read or write}
-  \item{with_imlib2}{whether to possibly choose Imbli2 for reading/writing}
-  \item{with_magickwand}{whether to possibly choose MagickWand for reading/writing}
+  \item{with.imlib2}{whether to possibly choose Imbli2 for reading/writing}
+  \item{with.magickwand}{whether to possibly choose MagickWand for reading/writing}
   \item{pm}{pixmap containing image to be written}
   \item{depth}{number of bits per pixel channel; normally 8, sometimes 16.}
 }
@@ -66,7 +66,7 @@ note that image file formats are determined (by whichever of the Imlib2
 or MagickWand libraries is called) based on the filename extension.  so,
 a file of foo.jpg would be assumed to be a JPEG file.
 
-the with_imlib2 and with_magickwand parameters each default to TRUE.  in
+the with.imlib2 and with.magickwand parameters each default to TRUE.  in
 this case, assuming the system has both libraries installed, image2k
 makes an arbitrary decision of which library to use, and sticks with
 that decision.  (I.e., it is *NOT* the case that image2k first tries one
@@ -78,8 +78,6 @@ library and, should that one fail, switches over to the other library.)
 }
 \author{
 Greg Minshall <\email{minshall@acm.org}>
-}
-\references{
 }
 \keyword{ package }
 \seealso{
