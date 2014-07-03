@@ -1,9 +1,8 @@
 ^\.RbuildIgnore$
 ^\.deps$
 ^README.org$
+^autom4te.cache$
 ^src/\.libs$
-^src/autom4te.cache$
-^src/build-aux.*$
 ^src/.*.o$
 ^src/.*.la$
 ^src/.*.lo$
