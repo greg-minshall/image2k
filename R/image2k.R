@@ -37,7 +37,7 @@ calc.usemagickwand <- function(with.imlib2, with.magickwand) {
 ## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
 ## is implementation dependent which library will be used for a given
 ## image.
-read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE, ...) {
+read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE) {
   usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
                                       with.magickwand=with.magickwand);
 

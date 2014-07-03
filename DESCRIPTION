@@ -11,5 +11,5 @@ Description: image2k creates pixmaps from any image file that is
   given a pixmap, image2k can write that to an image file using either
   Imlib2 and/or MagickWand.  (MagickWand is an optional library from
   ImageMagick.)
-License: MIT
+License: MIT + file LICENSE
 Depends: pixmap

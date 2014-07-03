@@ -14,8 +14,8 @@
   WandMagick interface.
 }
 \usage{
-read.image2k(file, with_imlib2=TRUE, with_magickwand=TRUE)
-write.image2k(file, pm, depth=8, with_imlib2=TRUE, with_magickwand=TRUE)
+read.image2k(file, with.imlib2=TRUE, with.magickwand=TRUE)
+write.image2k(file, pm, depth=8, with.imlib2=TRUE, with.magickwand=TRUE)
 }
 \arguments{
   \item{file}{pathname of file to read or write}

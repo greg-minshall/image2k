@@ -3,7 +3,7 @@
 ^README.org$
 ^src/\.libs$
 ^src/autom4te.cache$
-^src/build-aux$
+^src/build-aux.*$
 ^src/.*.o$
 ^src/.*.la$
 ^src/.*.lo$

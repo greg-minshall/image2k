@@ -15,10 +15,7 @@ config.log
 config.status
 configure
 libtool
-R/rimage2k.R
 src/.libs
-src/Makevars
-src/Makevars.in
 src/image2k.o
 src/imagehist.o
 src/imagehist
