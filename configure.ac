@@ -75,7 +75,6 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
-        src/Makevars
 ])
 
 AC_OUTPUT
