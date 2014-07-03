@@ -35,7 +35,7 @@ dyn.load("src/rimage2k.dylib")
 source("src/rimage2k.R")
 source("src/imagemean.R")
 z <- system("ls ~/NOTBACKEDUP/sensorproblem/tifs/L100001?.tif", TRUE)
-begin <- Sys.time(); zz <- imagemean("data/c-L1001745.png"); Sys.time()-begin;
+begin <- Sys.time(); zz <- imagemean("tests/c-L1001745.png"); Sys.time()-begin;
 write.image2k(file="xx.png", zz)
 
 begin <- Sys.time(); zz <- imagemean(z); Sys.time()-begin;

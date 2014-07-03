@@ -1,8 +1,8 @@
 ## dyn.load("image2k.dylib");
 
 calc.usemagickwand <- function(with.imlib2, with.magickwand) {
-  have_imlib2 = ..External("image2khaveimlib2");
-  have_magickwand = ..External("image2khavemagickwand");
+  have_imlib2 = .External("image2khaveimlib2");
+  have_magickwand = .External("image2khavemagickwand");
   
   if (!(with.imlib2 || with.magickwand)) {
     stop("read.image2k: can't turn off *both* with.imlib2 *and* with.magickwand");
@@ -20,7 +20,7 @@ calc.usemagickwand <- function(with.imlib2, with.magickwand) {
     if (with.imlib2) {
       usemagickwand = FALSE;
     } else {
-      stop("read.image2k: with_imlib=FALSE: no magickwand, so with.imlib2 can only be true");
+      stop("read.image2k: with.imlib=FALSE: no magickwand, so with.imlib2 can only be true");
     }
   } else if (have_magickwand) {
     if (with.magickwand) {
@@ -58,7 +58,7 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE) {
     im2k$blue <- (im2k$blue - datamin)/(datamax-datamin);
   }
 
-  z = new("pixmapRGB", pixmap(im2k$red, ...));
+  z = new("pixmapRGB", pixmap(im2k$red));
   z@red = im2k$red;
   z@green = im2k$green;
   z@blue = im2k$blue;
