@@ -1,14 +1,22 @@
+# initialize things
 AC_INIT([image2k],[0.1])
 AC_CONFIG_AUX_DIR(build-aux)
 AC_CONFIG_MACRO_DIR([build-aux/m4])
-
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AM_PROG_AR
-LT_INIT
-
 AC_CONFIG_SRCDIR([src/image2k.c])
 
-# from Writing R Extensions: get the right compiler and flags
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+
+# declare some tools
+AC_PROG_CC
+AC_PROG_CPP
+AM_PROG_AR
+
+# initialize libtool (must be done *after* AM_PROG_AR)
+LT_INIT([disable-static])
+
+
+# from Writing R Extensions: get the right compiler and flags for R
+
 : ${R_HOME=`R RHOME`}
 if test -z "${R_HOME}"; then
   echo "could not determine R_HOME"
@@ -24,14 +32,16 @@ AC_SUBST(R_CPPFLAGS)
 AC_SUBST(R_LDFLAGS)
 
 
-AC_PROG_CC
-AC_PROG_CPP
+# now, check for Imlib2 and/or MagickWand.
 
 # a good reference to PKG_CHECK_MODULES:
 # https://www.flameeyes.eu/autotools-mythbuster/pkgconfig/pkg_check_modules.html
 
 have_imlib2=1
-PKG_CHECK_MODULES([IMLIB2], [imlib2], [AC_DEFINE([HAVE_IMLIB2], [1], [Have Imlib2])], [have_imlib2=0])
+PKG_CHECK_MODULES([IMLIB2],
+                  [imlib2],
+                  [AC_DEFINE([HAVE_IMLIB2], [1], [Have Imlib2])],
+                  [have_imlib2=0])
 AC_SUBST(IMLIB2_CFLAGS)
 AC_SUBST(IMLIB2_LIBS)
 CPPFLAGS="${CPPFLAGS} ${IMLIB2_CFLAGS}"
@@ -39,7 +49,10 @@ LIBS="${LIBS} ${IMLIB2_LIBS}"
 AC_SUBST(have_imlib2)
 
 have_magickwand=1
-PKG_CHECK_MODULES([MAGICKWAND], [MagickWand], [AC_DEFINE([HAVE_MAGICKWAND], [1], [Have MagickWand])], [have_magickwand=0])
+PKG_CHECK_MODULES([MAGICKWAND],
+                  [MagickWand],
+                  [AC_DEFINE([HAVE_MAGICKWAND], [1], [Have MagickWand])],
+                  [have_magickwand=0])
 AC_SUBST(MAGICKWAND_CFLAGS)
 AC_SUBST(MAGICKWAND_LIBS)
 CPPFLAGS="${CPPFLAGS} ${MAGICKWAND_CFLAGS}"
@@ -57,6 +70,8 @@ if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
 fi
 
 
+# need X11, as some of the include files (in MagickWand, i think) try to include from there.
+
 AC_PATH_X
 if test -n "${x_includes}"; then
   X_CFLAGS="-I${x_includes}"
@@ -71,10 +86,15 @@ else
   LIBS="${LIBS} -lX11"
 fi
 
+
+# declare output files
+
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
 ])
 
+
+# create the output
 AC_OUTPUT
