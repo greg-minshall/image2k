@@ -1,11 +1,11 @@
 chkcompat <- function(pm1, pm2) {
   ## make sure the images have the same channels
-  if (!all(pm1@channels == pm2@channels)) {
+  if (!identical(pm1@channels, pm2@channels)) {
     stop("images have different color channels: \"%s\" versus \"%s\"",
          sprintf("%s ", pm1@channels), sprintf("%s ", pm2@channels));
   }
   ## make sure the images have the same size
-  if (!all(pm1@size == pm2@size)) {
+  if (!identical(pm1@size, pm2@size)) {
     stop(sprintf("images have different sizes: %dx%d versus %dx%d",
                  pm1@size[1], pm1@size[2], pm2@size[1], pm2@size[2]));
   }
