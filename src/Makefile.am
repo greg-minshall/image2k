@@ -1,7 +1,7 @@
 # $Id: fba8f98c312c5ae3a0a0bffd7bbedd95612a9b89 $
 
 lib_LTLIBRARIES = libimage2k.la
-libimage2k_la_SOURCES = image2k.c rimage2k.c
+libimage2k_la_SOURCES = image2k.c rimage2k.c image2k.h
 
 EXTRA_PROGRAMS = imagemean imagehist imagergb
 imagemean_SOURCES = imagemean.c image2k.c
