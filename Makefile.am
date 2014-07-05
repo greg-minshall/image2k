@@ -36,5 +36,8 @@ ${PACKAGE}_${VERSION}.tar.gz: ${PACKAGE}-${VERSION}.tar.gz
 rbuild: ${PACKAGE}_${VERSION}.tar.gz
 
 rcheck: rbuild
+	cur=`pwd` && \
+	rm -rf ${TMP} && \
+	mkdir ${TMP} && \
 	cd ${TMP} && \
-	R CMD check ${PACKAGE}
+	R CMD check $${cur}/${PACKAGE}_${VERSION}.tar.gz
