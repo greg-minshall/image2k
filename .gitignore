@@ -4,6 +4,7 @@ m4/
 imagergb.dSYM/
 .deps
 ..Rcheck
+DESCRIPTION
 Makefile
 Makefile.in
 Rprof.out
