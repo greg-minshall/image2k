@@ -2,6 +2,8 @@
 ^\.deps$
 ^README.org$
 ^autom4te.cache$
+^__TMP__$
+.*.tar.gz
 ^src/\.libs$
 ^src/.*.o$
 ^src/.*.la$
