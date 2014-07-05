@@ -15,6 +15,7 @@ config.h.in~
 config.log
 config.status
 configure
+image2k*tar.gz
 libtool
 src/.libs
 src/image2k.o
@@ -24,8 +25,8 @@ src/imagemean.o
 src/imagemean
 src/imagergb.o
 src/imagergb
-src/librimage2k.la
-src/librimage2k_la*
+src/libimage2k.la
+src/libimage2k_la*
 src/image2k.dylib
 src/rimage2k.o
 stamp-h1
