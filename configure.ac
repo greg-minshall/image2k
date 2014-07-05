@@ -12,7 +12,7 @@ AC_PROG_CPP
 AM_PROG_AR
 
 # initialize libtool (must be done *after* AM_PROG_AR)
-LT_INIT([disable-static])
+LT_INIT
 
 
 # from Writing R Extensions: get the right compiler and flags for R
@@ -70,7 +70,8 @@ if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
 fi
 
 
-# need X11, as some of the include files (in MagickWand, i think) try to include from there.
+# need X11, as some of the include files (in MagickWand, i think) try
+# to include from there.
 
 AC_PATH_X
 if test -n "${x_includes}"; then
@@ -91,6 +92,7 @@ fi
 
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
+        DESCRIPTION
         Makefile
         src/Makefile
 ])
