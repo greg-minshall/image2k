@@ -1,7 +1,8 @@
 Package: image2k
 Type: Package
 Title: interface between pixmap and Imlib2 and/or MagickWand
-Version: 1.0
+Version: @VERSION@
+Priority: other
 Date: 2014-06-24
 Author: Greg Minshall
 Maintainer: Greg Minshall <minshall@acm.org>
