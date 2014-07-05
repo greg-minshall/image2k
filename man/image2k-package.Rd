@@ -138,3 +138,5 @@ imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE)
     write.image2k(output, pm);
   }
 }
+}
+}
