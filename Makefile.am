@@ -8,6 +8,8 @@ TMP = __TMP__
 RGOLDIN = tests/c-L1001745.png
 RGOLDOUT = tests/c-L1001745.digest
 
+RMD5IMAGE = tests/rmd5image.R
+
 # keep libtoolize happy...
 # https://trac.transmissionbt.com/ticket/1335
 
@@ -21,7 +23,7 @@ EXTRA_DIST = DESCRIPTION LICENSE NAMESPACE \
 		tests/
 
 ${RGOLDOUT}: ${RGOLDIN}
-	./rtests.R $^ 2> /dev/null > $@
+	${RMD5IMAGE} -f $^ 2> /dev/null > $@
 
 # i'd like to do testing with some sort of test harness (such as
 # https://github.com/sstephenson/bats), but obviously it's not going
@@ -54,20 +56,17 @@ rcheck: rbuild
 	cd $${from};		# we're here, but for clarity...
 	rm -rf ${TMP}
 
-rtestinstall: rbuild
+rtests: rbuild
 	from=`pwd` && \
 	rm -rf ${TMP} && \
 	mkdir ${TMP} && \
 	cd ${TMP} && \
 	mkdir testlib && \
+	echo "checking install" && \
 	R CMD install --library=testlib $${from}/${PACKAGE}_${VERSION}.tar.gz && \
-	cd $${from};		# we're here, but for clarity...
-	echo rm -rf ${TMP}
-
-
-rtests: rbuild
-	from=`pwd` && \
-	cd ${TMP} && \
-	$${from}/rtests.R --image2klib testlib $${from}/tests/c-L1001745.png \
-						2> /dev/null | \
-	(cd $${from}; diff ${RGOLDOUT} -);
+	echo "checking functionality" && \
+	$${from}/${RMD5IMAGE} --image2klib testlib \
+			-f $${from}/tests/c-L1001745.png 2>&1 | \
+		grep -v "^libpng warning" | \
+		diff $${from}/${RGOLDOUT} - && \
+	rm -rf ${TMP}
