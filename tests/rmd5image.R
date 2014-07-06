@@ -15,13 +15,14 @@ usage <- function(spec) {
 }
 
 
-md5.image2k <- function(file, ...) {
+md5.image2k <- function(file, pref.lib=NULL) {
   comps <- strsplit(file, .Platform$file.sep)[[1]];
   lcomp <- comps[length(comps)];
-  im2k <- read.image2k(file, ...);
-  res <- matrix(nrow=0, ncol=3);
+  im2k <- read.image2k(file, pref.lib=pref.lib);
+  res <- matrix(nrow=0, ncol=4);
   for (chan in sort(im2k@channels)) {
     res <- rbind(res, c(file=lcomp,
+                        lib=pref.lib,
                         chan=chan,
                         md5=digest(slot(im2k, chan),algo="md5")));
   }
@@ -30,12 +31,14 @@ md5.image2k <- function(file, ...) {
 
 parserun <- function(args) {
   spec <- matrix(c(
-    "file",       "f", 1, "character", "input image filename",
-    "help",       "h", 0, "character", "print this usage information",
+    "compare",    "c", 1, "character", "file against which to compare",
+    "file",       "f", 1, "character", "file to process",
+    "help",       "h", 0, "logical",   "print this usage information",
     "image2klib", "i", 1, "character", "library location of image2k library",
-    "pref.lib",   "p", 1, "character", "string with one or two unique characters from  {2, k} (which library to use)"
+    "pref.lib",   "p", 1, "character", "string with one or two unique characters from  {2, k} (which library to use)",
+    "suffix",     "s", 1, "character", "if no -c, suffix for end of file name to find compare file",
+    "verbose",    "v", 0, "logical",   "normally taciturn, give a bit more feedback"
     ), byrow=TRUE, ncol=5);
-
 
   opts <- getopt(spec=spec, opt=args);
 
@@ -48,25 +51,68 @@ parserun <- function(args) {
     usage(spec);
   }
 
+  file <- opts$file;
+
   if (is.null(opts$image2klib)) {
     require(image2k, quietly=TRUE);
   } else {
     require(image2k, lib.loc=opts$image2klib, quietly=TRUE);
   }
 
-  file <- opts$file;
+  ## now, read in the standard against which we should compare (the
+  ## *existence* of one of these means we are consuming, not
+  ## generating)
+  if (!is.null(opts$compare)) {
+    docompare <- TRUE;
+    if (!is.null(opts$suffix)) {
+      cat("may specify only one of --compare|-c and --suffix|-s\n");
+      usage(spec);
+    }
+    cname <- opts$compare;
+  } else if (!is.null(opts$suffix)) {
+    docompare <- TRUE;
+    cname <- paste(file, opts$suffix, sep="");
+  } else {
+    docompare <- FALSE;
+  }
 
   res <- md5.image2k(file=file, pref.lib=opts$pref.lib);
 
-  print(res);
-  print(nrow(res));
-  for (i in 1:nrow(res)) {
-    cat(sprintf("%s %s %s\n", res[i,"file"], res[i,"chan"], res[i,"md5"]));
+  res <- res[order(res[,"chan"]),];
+  if (docompare) {
+    cvalue <- as.matrix(read.table(cname, colClasses=c("character")));
+    colnames(cvalue) <- colnames(res);
+    cvalue <- cvalue[order(cvalue[,"chan"]),];
+  }
+
+  if (docompare) {
+    if (!identical(as.matrix(cvalue), as.matrix(res))) {
+      cat(sprintf("%s %s differ\n", file, cname));
+      q(status=1);
+    } else if (!is.null(opts$verbose)) {
+      cat(sprintf("%s %s identical\n", file, cname));
+    }
+  } else {
+    for (i in 1:nrow(res)) {
+      cat(sprintf("%s %s %s %s\n", res[i,"file"], res[i, "lib"], res[i,"chan"], res[i,"md5"]));
+    }
   }
 }
 
-## if we are called from Rscript, parse arguments and run the command
-## (but, if sourced, don't do anything useful).
 if (!is.na(get_Rscript_filename())) {
+  ## if we are called from Rscript, parse arguments and run the command
   parserun(commandArgs(TRUE));
+} else {
+  ## run somes tests
+  file <- "c-L1001745.png";
+  parserun(
+    c(
+      strsplit(
+        sprintf("-f %s --pref.lib 2 --suffix _2_md5.GOLD -v", file),
+        split=" ")[[1]]));
+  parserun(
+    c(
+      strsplit(
+        sprintf("-f %s --pref.lib k --suffix _k_md5.GOLD -v", file),
+        split=" ")[[1]]));
 }
