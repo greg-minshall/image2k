@@ -19,8 +19,7 @@ spec <- matrix(c(
   "file",       "f", 1, "character", "input image filename",
   "help",       "h", 0, "character", "print this usage information",
   "image2klib", "i", 1, "character", "library location of image2k library",
-  "withk",      "k", 0, "logical",   "use MagickWand",
-  "with2",      "2", 0, "logical",   "use Imlib2"
+  "pref.lib",   "p", 1, "character", "string with one or two of \"2\", \"k\" (which library to use)"
   ), byrow=TRUE, ncol=5);
 
 
@@ -40,15 +39,6 @@ if ((!is.null(opts$withk)) && (!is.null(opts$with2))) {
   usage();
 }
 
-with.imlib2 <- TRUE;
-with.magickwand <- TRUE;
-
-if (!is.null(opts$with2)) {
-  with.magickwand <- FALSE;
-} else if (!is.null(opts$withk)) {
-  with.imlib2 <- FALSE;
-}
-
 if (!is.null(opts$image2klib)) {
   require(image2k, lib.loc=opts$image2klib, quietly=TRUE);
 } else {
@@ -58,7 +48,7 @@ if (!is.null(opts$image2klib)) {
 file <- opts$file;
 comps <- strsplit(file, .Platform$file.sep)[[1]];
 lcomp <- comps[length(comps)];
-im2k <- read.image2k(file, with.imlib2=with.imlib2, with.magickwand=with.magickwand);
+im2k <- read.image2k(file, pref.lib=opts$pref.lib);
 for (chan in sort(im2k@channels)) {
-  cat(sprintf("%s, %s, %s\n", lcomp, chan, digest(slot(im2k, chan))))
+  cat(sprintf("%s, %s, %s\n", lcomp, chan, digest(slot(im2k, chan),algo="md5")));
 }
