@@ -97,9 +97,10 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([
         DESCRIPTION
         Makefile
-        src/Makefile
-        R/image2k.R
         man/image2k-package.Rd
+        R/image2k.R
+        src/Makefile
+        tests/rmd5image.R
 ])
 
 
