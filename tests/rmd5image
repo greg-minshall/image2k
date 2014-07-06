@@ -19,12 +19,17 @@ md5.image2k <- function(file, ...) {
   comps <- strsplit(file, .Platform$file.sep)[[1]];
   lcomp <- comps[length(comps)];
   im2k <- read.image2k(file, ...);
+  res <- matrix(nrow=0, ncol=3);
   for (chan in sort(im2k@channels)) {
-    cat(sprintf("%s %s %s\n", lcomp, chan, digest(slot(im2k, chan),algo="md5")));
+    res <- rbind(res, c(file=lcomp,
+                        chan=chan,
+                        md5=digest(slot(im2k, chan),algo="md5")));
   }
+  print(res);
+  res;
 }
 
-process <- function() {
+parserun <- function(args) {
   spec <- matrix(c(
     "file",       "f", 1, "character", "input image filename",
     "help",       "h", 0, "character", "print this usage information",
@@ -33,7 +38,7 @@ process <- function() {
     ), byrow=TRUE, ncol=5);
 
 
-  opts <- getopt(spec);
+  opts <- getopt(spec=spec, opt=args);
 
   if (!is.null(opts$help)) {
     usage(spec);
@@ -52,9 +57,16 @@ process <- function() {
 
   file <- opts$file;
 
-  md5.image2k(file=file, pref.lib=opts$pref.lib);
+  res <- md5.image2k(file=file, pref.lib=opts$pref.lib);
+
+  print(res);
+  print(nrow(res));
+  for (i in 1:nrow(res)) {
+    cat(sprintf("%s %s %s\n", res[i,"file"], res[i,"chan"], res[i,"md5"]));
+  }
 }
 
+## if we are called from Rscript, parse arguments and run the command
 if (!is.na(get_Rscript_filename())) {
-  process();
+  parserun(commandArgs(TRUE));
 }
