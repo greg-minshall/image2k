@@ -17,6 +17,7 @@ config.status
 configure
 image2k*tar.gz
 libtool
+R/image2k.R
 src/.libs
 src/image2k.o
 src/imagehist.o
