@@ -81,8 +81,7 @@ read.image2k <- function(file, pref.lib="2k") {
 }
 
 write.image2k <- function(file, pm, depth=8, pref.lib="2k") {
-  usemagickwand <- calc.usemagickwand(with.imlib2=with.imlib2,
-                                      with.magickwand=with.magickwand);
+  usemagickwand <- calc.usemagickwand(pref.lib=pref.lib);
 
   .External("image2kwrite", file=file,
             red=pm@red, green=pm@green, blue=pm@blue,
