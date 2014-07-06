@@ -103,31 +103,44 @@ if (!is.na(get_Rscript_filename())) {
   ## if we are called from Rscript, parse arguments and run the command
   parserun(commandArgs(TRUE));
 } else {
-  ## XXX @have_imlib2@, etc.!!!
   ## run somes tests
   file <- "c-L1001745.png";
   stemp <- "_%s_md5.GOLD";
-  suffixk <- sprintf(stemp, "k");
-  suffix2 <- sprintf(stemp, "2");
   ## first, make sure we read as we used to...
-  parserun(
-    c(
-      strsplit(
-        sprintf("-f %s --pref.lib 2 --suffix %s -v", file, suffix2),
-        split=" ")[[1]]));
-  parserun(
-    c(
-      strsplit(
-        sprintf("-f %s --pref.lib k --suffix %s -v", file, suffixk),
-        split=" ")[[1]]));
+  if (@have_imlib2@) {
+    suffix2 <- sprintf(stemp, "2");
+    parserun(
+      c(
+        strsplit(
+          sprintf("-f %s --pref.lib 2 --suffix %s", file, suffix2),
+          split=" ")[[1]]));
+  }
+  if (@have_magickwand@) {
+    suffixk <- sprintf(stemp, "k");
+    parserun(
+      c(
+        strsplit(
+          sprintf("-f %s --pref.lib k --suffix %s", file, suffixk),
+          split=" ")[[1]]));
+  }
   ## now, read in an image, then write it out, read it back in using
   ## the same method as we used to write it out, and make sure it
   ## agrees
-  outfile <- tempfile(fileext=".png");
+  bn <- basename(file);
+  a <- strsplit(bn, "[.]")[[1]];
+  ext <- a[length(a)];
+  outfile <- tempfile(fileext=ext);
   ## (we're not trying to test Imlib2 or MagickWand, so one output
   ## format seems sufficient)
   status <- 0;
-  for (i in c("2", "k")) {
+  vec <- c();
+  if (@have_imlib2@) {
+    vec <- c(vec, "2");
+  }
+  if (@have_magickwand@) {
+    vec <- c(vec, "k");
+  }
+  for (i in vec) {
     x <- read.image2k(file, pref.lib=i);
     write.image2k(file=outfile, pm=x, pref.lib=i);
     y <- read.image2k(file, pref.lib=i);
