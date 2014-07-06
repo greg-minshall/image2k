@@ -17,6 +17,7 @@ config.status
 configure
 image2k*tar.gz
 libtool
+man/image2k-package.Rd
 R/image2k.R
 src/.libs
 src/image2k.o
@@ -31,3 +32,4 @@ src/libimage2k_la*
 src/image2k.*dylib
 src/rimage2k.o
 stamp-h1
+tests/rmd5image.R
