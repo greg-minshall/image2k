@@ -12,7 +12,7 @@ chkcompat <- function(pm1, pm2) {
 }
 
 
-imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE) {
+imagemean <- function(file, output=NULL, ...) {
   ##  flatten input.  file may have been specified c(file1, file2,
   ## ...), and this will take care of that
   files <- c(file, ...);
@@ -23,7 +23,7 @@ imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE)
 
   nfiles = 0;
   for (f in files) {
-    pm <- read.image2k(f, with.imlib2=with.imlib2, with.magickwand=with.magickwand);
+    pm <- read.image2k(f, ...);
     if (nfiles == 0) {
       sum <- pm;
     } else {
@@ -39,7 +39,7 @@ imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE)
     slot(sum, chan) = slot(sum, chan)/nfiles;
   }
 
-  if (missing(output)) {
+  if (is.null(output)) {
     return(sum);
   } else {
     write.image2k(output, pm);

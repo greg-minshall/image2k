@@ -96,6 +96,7 @@ AC_CONFIG_FILES([
         Makefile
         src/Makefile
         R/image2k.R
+        man/image2k-package.Rd
 ])
 
 
