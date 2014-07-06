@@ -25,7 +25,6 @@ md5.image2k <- function(file, ...) {
                         chan=chan,
                         md5=digest(slot(im2k, chan),algo="md5")));
   }
-  print(res);
   res;
 }
 
@@ -49,8 +48,8 @@ parserun <- function(args) {
     usage(spec);
   }
 
-  if (!is.null(opts$image2klib)) {
-    require(image2k, lib.loc=opts$image2klib, quietly=TRUE);
+  if (is.null(opts$image2klib)) {
+    require(image2k, quietly=TRUE);
   } else {
     require(image2k, lib.loc=opts$image2klib, quietly=TRUE);
   }
