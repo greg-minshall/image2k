@@ -6,7 +6,8 @@ TMP = __TMP__
 # control.)
 
 RGOLDIN = tests/c-L1001745.png
-RGOLDOUT = tests/c-L1001745-png.digest
+RGOLDKOUT = tests/c-L1001745.png_k_md5.GOLD
+RGOLD2OUT = tests/c-L1001745.png_2_md5.GOLD
 
 RMD5IMAGE = tests/rmd5image
 
@@ -64,6 +65,7 @@ ${RTARFILEGZ}: ${PACKAGE}-${VERSION}.tar.gz
 	${TAR} czf $${from}/$@ ${PACKAGE}
 	echo XXX hack done && \
 	cd $${bname};		# we're here, but for clarity...
+	rm -rf ${TMP}
 
 rbuild: ${PACKAGE}_${VERSION}.tar.gz
 
@@ -85,7 +87,7 @@ rtests: rbuild
 	echo "checking install" && \
 	${R} CMD install --library=testlib $${from}/${RTARFILEGZ} && \
 	echo "checking functionality" && \
-	$${from}/${RMD5IMAGE} --image2klib testlib \
+	$${from}/${RMD5IMAGE} -p "k" --image2klib testlib \
 			-f $${from}/tests/c-L1001745.png 2>&1 | \
 		${GREP} -v "^libpng warning" | \
 		diff $${from}/${RGOLDOUT} - && \
