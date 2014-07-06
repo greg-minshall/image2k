@@ -6,41 +6,6 @@
 /* XXX should i start at 1?  or, at 0? */
 
 
-/*
- * XXX to create library:
- R CMD SHLIB -o rimage2k.dylib librimage2k_la-image2k.o librimage2k_la-rimage2k.o -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI -lImlib2
- * XXX to see dependencies:
- R CMD otool -L rimlib2.dylib
- * XXX to re-do build stuff:
- autoreconf --install
-*/
-
-/*
- R CMD SHLIB -o rimage2k.dylib librimage2k_la-image2k.o
- librimage2k_la-rimage2k.o -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI
- -lImlib2 ; flag-sort -r gcc -ffor-scope -dynamiclib
- -Wl,-headerpad_max_install_names -undefined dynamic_lookup
- -single_module -multiply_defined suppress -L/sw/lib -o rimage2k.dylib
- librimage2k_la-image2k.o librimage2k_la-rimage2k.o
- -lMagickWand-Q16HDRI -lMagickCore-Q16HDRI -lImlib2
- -L/sw/Library/Frameworks/R.framework/Versions/3.0/Resources/lib -lR
- -lintl -Wl,-framework -Wl,CoreFoundation;
-
-*/
-
-/*
-
-library(pixmap)
-dyn.load("src/rimage2k.dylib")
-source("src/rimage2k.R")
-source("src/imagemean.R")
-z <- system("ls ~/NOTBACKEDUP/sensorproblem/tifs/L100001?.tif", TRUE)
-begin <- Sys.time(); zz <- imagemean("tests/c-L1001745.png"); Sys.time()-begin;
-write.image2k(file="xx.png", zz)
-
-begin <- Sys.time(); zz <- imagemean(z); Sys.time()-begin;
-*/
-
 #include <strings.h>
 
 #include <R.h>
@@ -275,10 +240,10 @@ getPairListElement(SEXP pairs, const char *str, const char *cmd) {
  * its R, G, and B channels.
  */
 
-/* usage: rimageread(char *filename, bool usemagickwand); */
+/* usage: imageread(char *filename, bool usemagickwand); */
 
 static SEXP
-rimage2kread(SEXP args) {
+image2kread(SEXP args) {
     const char *file;
     SEXP rval, names;
     mytype_p mp;
@@ -288,10 +253,10 @@ rimage2kread(SEXP args) {
     im2k_t im2k;
 
     /* first, get file name */
-    file = CHAR(STRING_ELT(getPairListElement(args, "file", "rimageread"), 0));
+    file = CHAR(STRING_ELT(getPairListElement(args, "file", "imageread"), 0));
 
     /* second, get library to use */
-    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "rimageread"))[0];
+    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "imageread"))[0];
     if (usemagick == NA_LOGICAL) {
         error("'usemagickwand' must be TRUE or FALSE");
     }
@@ -351,7 +316,7 @@ rimage2kread(SEXP args) {
  * desired depth, write it out to the given file name.
  */
 static SEXP
-rimage2kwrite(SEXP args) {
+image2kwrite(SEXP args) {
     const char *file;
     mytype_p mp;
     int usemagick;
@@ -360,10 +325,10 @@ rimage2kwrite(SEXP args) {
     im2k_t im2k;
 
     /* first, get file name */
-    file = CHAR(STRING_ELT(getPairListElement(args, "file", "rimageread"), 0));
+    file = CHAR(STRING_ELT(getPairListElement(args, "file", "imageread"), 0));
 
     /* second, get library to use */
-    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "rimageread"))[0];
+    usemagick = LOGICAL(getPairListElement(args, "usemagickwand", "imageread"))[0];
     if (usemagick == NA_LOGICAL) {
         error("'usemagickwand' must be TRUE or FALSE");
     }
@@ -385,25 +350,25 @@ rimage2kwrite(SEXP args) {
 #endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
     mp = mytypecreate();
 
-    mp->sr = getPairListElement(args, "red", "rimagewrite");
+    mp->sr = getPairListElement(args, "red", "imagewrite");
     mp->sg = getPairListElement(args, "green", "rimatewrite");
-    mp->sb = getPairListElement(args, "blue", "rimagewrite");
+    mp->sb = getPairListElement(args, "blue", "imagewrite");
 
     if ((!isMatrix(mp->sr)) || (!isMatrix(mp->sg)) || (!isMatrix(mp->sb))) {
-        error("rimagewrite: the red, green, and blue parameters must be matrices");
+        error("imagewrite: the red, green, and blue parameters must be matrices");
         /*NOTREACHED*/
     }
 
     if ((nrows(mp->sr) != nrows(mp->sg)) || (nrows(mp->sg) != nrows(mp->sb)) ||
         (ncols(mp->sr) != ncols(mp->sg)) || (ncols(mp->sg) != ncols(mp->sb))) {
-        error("rimagewrite: the red, green, and blue matrices must have the same dimensions");
+        error("imagewrite: the red, green, and blue matrices must have the same dimensions");
         /*NOTREACHED*/
     }
 
     mp->hhh = nrows(mp->sr);
     mp->www = ncols(mp->sr);
 
-    mp->depth = REAL(getPairListElement(args, "depth", "rimagewrite"))[0];
+    mp->depth = REAL(getPairListElement(args, "depth", "imagewrite"))[0];
 
     mp->rr = REAL(mp->sr);
     mp->rg = REAL(mp->sg);
@@ -427,13 +392,13 @@ rimage2kwrite(SEXP args) {
 
 /*
  * allow the R code to find out how we are configured/compliled.
- * (originally, i had a rimage2k.R.in file, but when i moved
+ * (originally, i had a image2k.R.in file, but when i moved
  * configure.ac to src/configure.ac, i was unhappy with having to
  * modify a file in ../R, so decided to do this.)
  */
 
 static SEXP
-rimage2khavemagickwand(SEXP args) {
+image2khavemagickwand(SEXP args) {
 #if defined(HAVE_MAGICKWAND)
     return ScalarLogical(1);
 #else  /* defined(HAVE_MAGICKWAND) */
@@ -442,7 +407,7 @@ rimage2khavemagickwand(SEXP args) {
 }
 
 static SEXP
-rimage2khaveimlib2(SEXP args) {
+image2khaveimlib2(SEXP args) {
 #if defined(HAVE_IMLIB2)
     return ScalarLogical(1);
 #else  /* defined(HAVE_IMLIB2) */
@@ -455,10 +420,10 @@ rimage2khaveimlib2(SEXP args) {
 void R_init_image2k(DllInfo *info)
 {
     static const R_ExternalMethodDef externalMethods[] = {
-        {"image2kread",  (DL_FUNC) &rimage2kread, -1},
-        {"image2kwrite",  (DL_FUNC) &rimage2kwrite, -1},
-        {"image2khavemagickwand", (DL_FUNC) &rimage2khavemagickwand, 0},
-        {"image2khaveimlib2", (DL_FUNC) &rimage2khaveimlib2, 0},
+        {"image2kread",  (DL_FUNC) &image2kread, -1},
+        {"image2kwrite",  (DL_FUNC) &image2kwrite, -1},
+        {"image2khavemagickwand", (DL_FUNC) &image2khavemagickwand, 0},
+        {"image2khaveimlib2", (DL_FUNC) &image2khaveimlib2, 0},
         {NULL}
     };
     /* Register the .External routine.
