@@ -14,22 +14,23 @@
   WandMagick interface.
 }
 \usage{
-read.image2k(file, with.imlib2=TRUE, with.magickwand=TRUE)
-write.image2k(file, pm, depth=8, with.imlib2=TRUE, with.magickwand=TRUE)
+read.image2k(file, pref.lib="2k")
+write.image2k(file, pm, depth=8, pref.lib="2k")
 }
 \arguments{
   \item{file}{pathname of file to read or write}
-  \item{with.imlib2}{whether to possibly choose Imbli2 for reading/writing}
-  \item{with.magickwand}{whether to possibly choose MagickWand for reading/writing}
   \item{pm}{pixmap containing image to be written}
-  \item{depth}{number of bits per pixel channel; normally 8, sometimes 16.}
+  \item{depth}{number of bits per pixel channel; normally 8, sometimes
+    16.}
+  \item{pref.lib}{a character string consisting of at most one character
+  each from the set \{"2", "k"\}}
 }
 
 \details{
 \tabular{ll}{
 Package: \tab image2k\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab @VERSION@\cr
 Date: \tab 2014-06-24\cr
 License: \tab MIT\cr
 }
@@ -66,11 +67,16 @@ note that image file formats are determined (by whichever of the Imlib2
 or MagickWand libraries is called) based on the filename extension.  so,
 a file of foo.jpg would be assumed to be a JPEG file.
 
-the with.imlib2 and with.magickwand parameters each default to TRUE.  in
-this case, assuming the system has both libraries installed, image2k
-makes an arbitrary decision of which library to use, and sticks with
-that decision.  (I.e., it is *NOT* the case that image2k first tries one
-library and, should that one fail, switches over to the other library.)
+the pref.lib parameter gives an ordering for the image libaries to use
+to perform the operation, where "2" corresponds to Imlib2, and "k"
+corresponds to MagickWand.  a string "2k" (the default) means try Imlib2
+if it's available on the system, otherwise use Magickwand.  on the other
+hand, specifying "2" means use Imlib2 if it's available on the system,
+otherwise fail.  (NB: it is *NOT* the case that image2k will switch over
+to the second library specified if, for some reason the first library
+exists but is unable to perform the operation on the specified file; the
+first library that exists on the system, in the order specified in
+pref.lib, will be used and, if it fails, it fails.)
 
 }
 \value{
@@ -105,7 +111,8 @@ chkcompat <- function(pm1, pm2) {
 }
 
 
-imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE) {
+
+imagemean <- function(file, output=NULL, ...) {
   ##  flatten input.  file may have been specified c(file1, file2,
   ## ...), and this will take care of that
   files <- c(file, ...);
@@ -116,7 +123,7 @@ imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE)
 
   nfiles = 0;
   for (f in files) {
-    pm <- read.image2k(f, with.imlib2=with.imlib2, with.magickwand=with.magickwand);
+    pm <- read.image2k(f, ...);
     if (nfiles == 0) {
       sum <- pm;
     } else {
@@ -132,7 +139,7 @@ imagemean <- function(file, ..., output, with.imlib2=TRUE, with.magickwand=TRUE)
     slot(sum, chan) = slot(sum, chan)/nfiles;
   }
 
-  if (missing(output)) {
+  if (is.null(output)) {
     return(sum);
   } else {
     write.image2k(output, pm);
