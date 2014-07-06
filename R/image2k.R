@@ -58,7 +58,7 @@ read.image2k <- function(file, with.imlib2=TRUE, with.magickwand=TRUE) {
     im2k$blue <- (im2k$blue - datamin)/(datamax-datamin);
   }
 
-  z = new("pixmapRGB", pixmap(im2k$red));
+  z = new("pixmapRGB", pixmap(im2k$red, cellres=1));
   z@red = im2k$red;
   z@green = im2k$green;
   z@blue = im2k$blue;
