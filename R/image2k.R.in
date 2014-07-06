@@ -1,7 +1,7 @@
 calc.usemagickwand <- function(with.imlib2, with.magickwand) {
   ## passed down from configure.am, via image2k.R.in, to image2k.R
-  have_imlib2 = 1;
-  have_magickwand = 1;
+  have_imlib2 = @have_imlib2@;
+  have_magickwand = @have_magickwand@;
   
   if (!(with.imlib2 || with.magickwand)) {
     stop("read.image2k: can't turn off *both* with.imlib2 *and* with.magickwand");

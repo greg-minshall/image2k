@@ -27,6 +27,6 @@ src/imagergb.o
 src/imagergb
 src/libimage2k.la
 src/libimage2k_la*
-src/image2k.dylib
+src/image2k.*dylib
 src/rimage2k.o
 stamp-h1

@@ -4,11 +4,12 @@
 ^autom4te.cache$
 ^__TMP__$
 .*.tar.gz
+^R/image2k.R$
 ^src/\.libs$
 ^src/.*.o$
 ^src/.*.la$
 ^src/.*.lo$
 ^src/.*.dylib$
-^src/imagemean$
-^src/imagehist$
-^src/imagergb$
+^src/imagemean.*$
+^src/imagehist.*$
+^src/imagergb.*$

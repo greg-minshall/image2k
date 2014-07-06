@@ -390,31 +390,6 @@ image2kwrite(SEXP args) {
     return R_NilValue;
 }
 
-/*
- * allow the R code to find out how we are configured/compliled.
- * (originally, i had a image2k.R.in file, but when i moved
- * configure.ac to src/configure.ac, i was unhappy with having to
- * modify a file in ../R, so decided to do this.)
- */
-
-static SEXP
-image2khavemagickwand(SEXP args) {
-#if defined(HAVE_MAGICKWAND)
-    return ScalarLogical(1);
-#else  /* defined(HAVE_MAGICKWAND) */
-    return ScalarLogical(0);
-#endif  /* defined(HAVE_MAGICKWAND) */
-}
-
-static SEXP
-image2khaveimlib2(SEXP args) {
-#if defined(HAVE_IMLIB2)
-    return ScalarLogical(1);
-#else  /* defined(HAVE_IMLIB2) */
-    return ScalarLogical(0);
-#endif  /* defined(HAVE_IMLIB2) */
-}
-
 /* R glue */
 
 void R_init_image2k(DllInfo *info)
@@ -422,8 +397,6 @@ void R_init_image2k(DllInfo *info)
     static const R_ExternalMethodDef externalMethods[] = {
         {"image2kread",  (DL_FUNC) &image2kread, -1},
         {"image2kwrite",  (DL_FUNC) &image2kwrite, -1},
-        {"image2khavemagickwand", (DL_FUNC) &image2khavemagickwand, 0},
-        {"image2khaveimlib2", (DL_FUNC) &image2khaveimlib2, 0},
         {NULL}
     };
     /* Register the .External routine.

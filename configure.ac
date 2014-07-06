@@ -95,6 +95,7 @@ AC_CONFIG_FILES([
         DESCRIPTION
         Makefile
         src/Makefile
+        R/image2k.R
 ])
 
 

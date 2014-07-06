@@ -6,7 +6,7 @@ TMP = __TMP__
 # control.)
 
 RGOLDIN = tests/c-L1001745.png
-RGOLDOUT = tests/c-L1001745.digest
+RGOLDOUT = tests/c-L1001745-png.digest
 
 RMD5IMAGE = tests/rmd5image.R
 
