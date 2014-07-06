@@ -32,6 +32,10 @@ RPACKAGE = ${PACKAGE}_${VERSION}
 RTARFILE = ${RPACKAGE}.tar
 RTARFILEGZ = ${RTARFILE}.gz
 
+# in case someone wants to mess with any of these
+R = R
+TAR = tar
+
 
 # i'd like to do testing with some sort of test harness (such as
 # https://github.com/sstephenson/bats), but obviously it's not going
@@ -43,22 +47,22 @@ ${RTARFILEGZ}: ${PACKAGE}-${VERSION}.tar.gz
 	echo ${PACKAGE}
 	from=`pwd` && \
 	rm -rf ${TMP} && \
-	mkdir ${TMP} && \
+	${MKDIR_P} ${TMP} && \
 	cd ${TMP} && \
-	tar xzf $${from}/$^ && \
+	${TAR} xzf $${from}/$^ && \
 	mv ${PACKAGE}-${VERSION} ${PACKAGE} && \
-	R CMD build ${PACKAGE} && mv $@ $${from}; \
+	${R} CMD build ${PACKAGE} && mv $@ $${from}; \
 	cd $${from};		# we're here, but for clarity...
 	rm -rf ${TMP}
-	echo hack to get around man/image2k-package.Rd.in not being included && \
+	echo XXX hack to get around man/image2k-package.Rd.in not being included && \
 	from=`pwd` && \
 	rm -rf ${TMP} && \
-	mkdir ${TMP} && \
+	${MKDIR_P} ${TMP} && \
 	cd ${TMP} && \
-	tar xzf $${from}/$@ && \
+	${TAR} xzf $${from}/$@ && \
 	cp -p $${from}/man/image2k-package.Rd.in ${PACKAGE}/man/ && \
-	tar czf $${from}/$@ ${PACKAGE}
-	echo hack done && \
+	${TAR} czf $${from}/$@ ${PACKAGE}
+	echo XXX hack done && \
 	cd $${bname};		# we're here, but for clarity...
 
 rbuild: ${PACKAGE}_${VERSION}.tar.gz
@@ -66,26 +70,26 @@ rbuild: ${PACKAGE}_${VERSION}.tar.gz
 rcheck: rbuild
 	from=`pwd` && \
 	rm -rf ${TMP} && \
-	mkdir ${TMP} && \
+	${MKDIR_P} ${TMP} && \
 	cd ${TMP} && \
-	R CMD check $${from}/${RTARFILEGZ}
+	${R} CMD check $${from}/${RTARFILEGZ}
 	cd $${from};		# we're here, but for clarity...
 	rm -rf ${TMP}
 
 rtests: rbuild
 	from=`pwd` && \
 	rm -rf ${TMP} && \
-	mkdir ${TMP} && \
+	${MKDIR_P} ${TMP} && \
 	cd ${TMP} && \
-	mkdir testlib && \
+	${MKDIR_P} testlib && \
 	echo "checking install" && \
-	R CMD install --library=testlib $${from}/${RTARFILEGZ} && \
+	${R} CMD install --library=testlib $${from}/${RTARFILEGZ} && \
 	echo "checking functionality" && \
 	$${from}/${RMD5IMAGE} --image2klib testlib \
 			-f $${from}/tests/c-L1001745.png 2>&1 | \
-		grep -v "^libpng warning" | \
+		${GREP} -v "^libpng warning" | \
 		diff $${from}/${RGOLDOUT} - && \
 	rm -rf ${TMP}
 
 rinstall: rbuild
-	R CMD install ${RTARFILEGZ}
+	${R} CMD install ${RTARFILEGZ}

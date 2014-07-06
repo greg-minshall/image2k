@@ -11,6 +11,9 @@ AC_PROG_CC
 AC_PROG_CPP
 AM_PROG_AR
 
+AC_PROG_GREP
+AC_PROG_MKDIR_P
+
 # initialize libtool (must be done *after* AM_PROG_AR)
 LT_INIT
 
