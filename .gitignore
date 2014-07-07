@@ -30,6 +30,7 @@ src/imagergb
 src/libimage2k.la
 src/libimage2k_la*
 src/image2k.*dylib
+src/image2k.so*
 src/rimage2k.o
 stamp-h1
 tests/rmd5image.R
