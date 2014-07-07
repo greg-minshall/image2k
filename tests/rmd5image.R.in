@@ -128,7 +128,7 @@ if (!is.na(get_Rscript_filename())) {
   ## agrees
   bn <- basename(file);
   a <- strsplit(bn, "[.]")[[1]];
-  ext <- a[length(a)];
+  ext <- sprintf(".%s", a[length(a)]);
   outfile <- tempfile(fileext=ext);
   ## (we're not trying to test Imlib2 or MagickWand, so one output
   ## format seems sufficient)
