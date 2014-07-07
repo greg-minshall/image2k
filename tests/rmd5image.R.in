@@ -105,6 +105,14 @@ if (!is.na(get_Rscript_filename())) {
 } else {
   ## run somes tests
   file <- "c-L1001745.png";
+  if (!file.exists(file)) {
+    file <- paste("tests/", file, sep="");
+    if (!file.exists(file)) {
+      system("pwd");
+      cat(sprintf("can't find %s or %s\n", basename(file), file));
+      q(1);
+    }
+  }
   stemp <- "_%s_md5.GOLD";
   ## first, make sure we read as we used to...
   if (@have_imlib2@) {
