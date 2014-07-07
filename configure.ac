@@ -8,6 +8,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # declare some tools
 AC_PROG_CC
+AC_PROG_CC_STDC
 AC_PROG_CPP
 AM_PROG_AR
 
@@ -63,7 +64,7 @@ LIBS="${LIBS} ${MAGICKWAND_LIBS}"
 AC_SUBST(have_magickwand)
 
 # error if we can find neither Imlib2 nor MagickWand...
-if test x${have_imlib2} == xno && test x${have_magickwand} == xno; then
+if test x${have_imlib2} \!= x1 && test x${have_magickwand} \!= x1; then
    AC_MSG_ERROR([
    ---------------------------------------------------
    Neither Imlib2 nor MagickWand (an optional part of
