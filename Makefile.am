@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS = -Ibuild-aux/m4
  # needed to keep R CMD check from having problems (while we have to
  # use the hack in rbuild below)
 EXTRA_DIST = DESCRIPTION LICENSE NAMESPACE \
-		.Rbuildignore \
+		.RbuildIgnore \
 		R/image2k.R \
 		inst/CITATION \
 		man/image2k-package.Rd \
