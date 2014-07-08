@@ -1,9 +1,9 @@
 SUBDIRS = src
 TMP = __TMP__
 
-# we md5 ${RGOLDIN} into ${RGOLDOUT}.  this should only be run if
-# something massive changes.  (in fact, ${RGOLDOUT} is under source
-# control.)
+# we md5 ${RGOLDIN} into ${RGOLD{2,K}OUT}.  this should only be run if
+# something massive changes.  (in fact, ${RGOLD{2,K}OUT} are under
+# source control.)
 
 RGOLDIN = tests/c-L1001745.png
 RGOLDKOUT = tests/c-L1001745.png_k_md5.GOLD
@@ -26,8 +26,11 @@ EXTRA_DIST = DESCRIPTION LICENSE NAMESPACE \
 		man/image2k-package.Rd \
 		tests/
 
-${RGOLDOUT}: ${RGOLDIN}
-	${RMD5IMAGE} -f $^ 2> /dev/null > $@
+${RGOLDKOUT}: ${RGOLDIN}
+	${RMD5IMAGE} -p k -f $^ 2> /dev/null > $@
+
+${RGOLD2OUT}: ${RGOLDIN}
+	${RMD5IMAGE} -p 2 -f $^ 2> /dev/null > $@
 
 RPACKAGE = ${PACKAGE}_${VERSION}
 RTARFILE = ${RPACKAGE}.tar
@@ -90,8 +93,8 @@ rtests: rbuild
 	$${from}/${RMD5IMAGE} -p "k" --image2klib testlib \
 			-f $${from}/tests/c-L1001745.png 2>&1 | \
 		${GREP} -v "^libpng warning" | \
-		diff $${from}/${RGOLDOUT} - && \
+		diff $${from}/${RGOLDKOUT} - && \
 	rm -rf ${TMP}
 
 rinstall: rbuild
-	${R} CMD install ${RTARFILEGZ}
+	${R} CMD INSTALL ${RTARFILEGZ}
