@@ -48,7 +48,7 @@ TAR = tar
 # me?
 
 ${RTARFILEGZ}: ${PACKAGE}-${VERSION}.tar.gz
-	echo ${PACKAGE}
+	${srcdir}/configure	# need to get, e.g., image2k.R.in --> image2k.R
 	from=`pwd` && \
 	rm -rf ${TMP} && \
 	${MKDIR_P} ${TMP} && \

@@ -23,7 +23,7 @@ calc.usemagickwand <- function(pref.lib="2k") {
   if (substr(pref.lib, 1, 1) == "k") {  # wants magickwand
     if (have_magickwand) {
       return(TRUE);
-    } else if ((nchars(pref.lib) > 1) && (substr(pref.lib, 2, 1) == "2")) {
+    } else if ((nchar(pref.lib) > 1) && (substr(pref.lib, 2, 1) == "2")) {
     ## no magickwand.  will they accept imlib2?
       return(FALSE);
     } else {                            # sorry, your choice isn't available
@@ -55,6 +55,8 @@ read.image2k <- function(file, pref.lib="2k") {
   ## the C code has only "usemagickwand".  we get there from pref.lib
   usemagickwand <- calc.usemagickwand(pref.lib=pref.lib);
 
+  file <- Sys.glob(path.expand(file));
+
   im2k <- .External("image2kread", file=file, usemagickwand=usemagickwand);
   
   if ((!all(dim(im2k$red) == dim(im2k$green))) ||
@@ -83,6 +85,8 @@ read.image2k <- function(file, pref.lib="2k") {
 write.image2k <- function(file, pm, depth=8, pref.lib="2k") {
   usemagickwand <- calc.usemagickwand(pref.lib=pref.lib);
 
+  file <- path.expand(file);
+  
   .External("image2kwrite", file=file,
             red=pm@red, green=pm@green, blue=pm@blue,
             depth=depth, usemagickwand=usemagickwand);

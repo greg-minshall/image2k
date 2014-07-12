@@ -10,7 +10,7 @@
 
 \description{
   Image2k allows pixmap images to be read from, or written to, files of
-  various image file formats, using Imlib2 and/or ImageMagick\'s
+  various image file formats, using Imlib2 and/or ImageMagick's
   WandMagick interface.
 }
 \usage{
@@ -67,16 +67,17 @@ note that image file formats are determined (by whichever of the Imlib2
 or MagickWand libraries is called) based on the filename extension.  so,
 a file of foo.jpg would be assumed to be a JPEG file.
 
-the pref.lib parameter gives an ordering for the image libaries to use
-to perform the operation, where "2" corresponds to Imlib2, and "k"
-corresponds to MagickWand.  a string "2k" (the default) means try Imlib2
-if it's available on the system, otherwise use Magickwand.  on the other
-hand, specifying "2" means use Imlib2 if it's available on the system,
-otherwise fail.  (NB: it is *NOT* the case that image2k will switch over
-to the second library specified if, for some reason the first library
-exists but is unable to perform the operation on the specified file; the
-first library that exists on the system, in the order specified in
-pref.lib, will be used and, if it fails, it fails.)
+the pref.lib parameter gives a preference ordering for the image
+libaries to use to perform the operation, where "2" corresponds to
+Imlib2, and "k" corresponds to MagickWand.  a string "2k" (the default)
+means use Imlib2 if it's available on the system, otherwise use
+Magickwand.  on the other hand, specifying "2" means use Imlib2 if it's
+available on the system, otherwise fail.  (NB: it is *NOT* the case that
+image2k will switch over to the second library specified if, for some
+reason the first library exists but is unable to perform the operation
+on the specified file; the first library that exists on the system, in
+the order specified in pref.lib, will be used and, if it fails, the
+image2k operation will also fail.)
 
 }
 \value{
@@ -88,7 +89,7 @@ Greg Minshall <\email{minshall@acm.org}>
 \keyword{ package }
 \seealso{
 \code{\link{pixmap}}
-\code{\link{rtiff}}
+\code{\link[rtiff]{rtiff}}
 }
 \examples{
 ## a simple program to read in a variable number of files (of the
