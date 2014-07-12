@@ -18,7 +18,7 @@ usage <- function(spec) {
 md5.image2k <- function(file, pref.lib=NULL) {
   comps <- strsplit(file, .Platform$file.sep)[[1]];
   lcomp <- comps[length(comps)];
-  im2k <- read.image2k(file, pref.lib=pref.lib);
+  im2k <- p2k.read(file, pref.lib=pref.lib);
   res <- matrix(nrow=0, ncol=4);
   for (chan in sort(im2k@channels)) {
     res <- rbind(res, c(file=lcomp,
@@ -149,9 +149,9 @@ if (!is.na(get_Rscript_filename())) {
     vec <- c(vec, "k");
   }
   for (i in vec) {
-    x <- read.image2k(file, pref.lib=i);
-    write.image2k(file=outfile, pm=x, pref.lib=i);
-    y <- read.image2k(file, pref.lib=i);
+    x <- p2k.read(file, pref.lib=i);
+    p2k.write(file=outfile, pm=x, pref.lib=i);
+    y <- p2k.read(file, pref.lib=i);
     if (!identical(x,y)) {
       cat(sprintf("round trip error: using pref.lib=%s, read %s, wrote it, read it back, and it wasn't the same\n"));
       status=1;

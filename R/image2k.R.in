@@ -1,4 +1,4 @@
-calc.usemagickwand <- function(pref.lib="2k") {
+calc.usemagickwand <- function(cmd, pref.lib="2k") {
   ## passed down from configure.am, via image2k.R.in, to image2k.R
   have_imlib2 = @have_imlib2@;
   have_magickwand = @have_magickwand@;
@@ -8,16 +8,16 @@ calc.usemagickwand <- function(pref.lib="2k") {
   }
   
   if ((!have_imlib2) && (!have_magickwand)) {
-    stop(
-      "read.image2k: installation error: neither Imlib2 nor Magickwand available");
+    stop(sprintf(
+      "%s: installation error: neither Imlib2 nor Magickwand available", cmd));
   }
 
   ## check argument
   if ((nchar(pref.lib) > 2) ||
       (length(grep("[^2k]", pref.lib)) != 0)) {
     stop(sprintf(
-      "read.image2k: pref.lib=\"%s\": can only specify one or two of \"2\" and \"k\"",
-      pref.lib));
+      "%s: pref.lib=\"%s\": can only specify one or two of \"2\" and \"k\"",
+      cmd, pref.lib));
   }
 
   if (substr(pref.lib, 1, 1) == "k") {  # wants magickwand
@@ -28,8 +28,8 @@ calc.usemagickwand <- function(pref.lib="2k") {
       return(FALSE);
     } else {                            # sorry, your choice isn't available
       stop(sprintf(
-        "read.image2k: pref.lib=\"%s\": MagickWand is not avalable on this system",
-        pref.lib));
+        "%s: pref.lib=\"%s\": MagickWand is not avalable on this system",
+        cmd, pref.lib));
     }
   } else if (substr(pref.lib, 1, 1) == "2") {
     if (have_imlib2) {
@@ -38,22 +38,22 @@ calc.usemagickwand <- function(pref.lib="2k") {
       return(TRUE);
     } else {
       stop(sprintf(
-        "read.image2k: pref.lib=\"%s\": Imlib2 is not avalable on this system",
-        pref.lib));
+        "%s: pref.lib=\"%s\": Imlib2 is not avalable on this system",
+        cmd, pref.lib));
     }
   } else {                              # we shouldn't get here (hah!)
     stop(sprintf(
-      "read.image2k: pref.lib=\"%s\": programming error (sorry!).",
-      pref.lib));
+      "%s: pref.lib=\"%s\": programming error (sorry!).",
+      cmd, pref.lib));
   }
 }
 
 ## with the default parameters with.imlib2=TRUE, with.magick=TRUE, it
 ## is implementation dependent which library will be used for a given
 ## image.
-read.image2k <- function(file, pref.lib="2k") {
+p2k.read <- function(file, pref.lib="2k") {
   ## the C code has only "usemagickwand".  we get there from pref.lib
-  usemagickwand <- calc.usemagickwand(pref.lib=pref.lib);
+  usemagickwand <- calc.usemagickwand(cmd="p2k.read", pref.lib=pref.lib);
 
   file <- Sys.glob(path.expand(file));
 
@@ -82,8 +82,8 @@ read.image2k <- function(file, pref.lib="2k") {
   z
 }
 
-write.image2k <- function(file, pm, depth=8, pref.lib="2k") {
-  usemagickwand <- calc.usemagickwand(pref.lib=pref.lib);
+p2k.write <- function(file, pm, depth=8, pref.lib="2k") {
+  usemagickwand <- calc.usemagickwand(cmd="p2k.write", pref.lib=pref.lib);
 
   file <- path.expand(file);
   

@@ -1,4 +1,4 @@
 useDynLib(image2k, .registration=TRUE)
 import(pixmap)
-export(read.image2k, write.image2k)
+export(p2k.read, p2k.write)
 

@@ -1,8 +1,8 @@
 \name{image2k-package}
 
 \alias{image2k}
-\alias{read.image2k}
-\alias{write.image2k}
+\alias{p2k.read}
+\alias{p2k.write}
 
 \docType{package}
 
@@ -14,8 +14,8 @@
   WandMagick interface.
 }
 \usage{
-read.image2k(file, pref.lib="2k")
-write.image2k(file, pm, depth=8, pref.lib="2k")
+p2k.read(file, pref.lib="2k")
+p2k.write(file, pm, depth=8, pref.lib="2k")
 }
 \arguments{
   \item{file}{pathname of file to read or write}
@@ -56,10 +56,10 @@ libraries.  (Of course, one or both of these libraries needs to be
 installed on your machine at the time image2k is installed, and is run,
 for this to be possible.)
 
-\code{read.image2k} reads an image file, and returns a pixmapRGB with
+\code{p2k.read} reads an image file, and returns a pixmapRGB with
 that files contents in it.
 
-\code{write.image2kwrite} attempts to write the image contained in pm to
+\code{p2k.writewrite} attempts to write the image contained in pm to
 the image file.  the depth of the image (default \code{8}) can be
 specified.
 
@@ -81,7 +81,7 @@ image2k operation will also fail.)
 
 }
 \value{
-  \code{read.image2k}, if succesful, returns a pixmapRGB object.
+  \code{p2k.read}, if succesful, returns a pixmapRGB object.
 }
 \author{
 Greg Minshall <\email{minshall@acm.org}>
@@ -124,7 +124,7 @@ imagemean <- function(file, output=NULL, ...) {
 
   nfiles = 0;
   for (f in files) {
-    pm <- read.image2k(f, ...);
+    pm <- p2k.read(f, ...);
     if (nfiles == 0) {
       sum <- pm;
     } else {
@@ -143,7 +143,7 @@ imagemean <- function(file, output=NULL, ...) {
   if (is.null(output)) {
     return(sum);
   } else {
-    write.image2k(output, pm);
+    p2k.write(output, pm);
   }
 }
 }

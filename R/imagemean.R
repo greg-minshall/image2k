@@ -23,7 +23,7 @@ imagemean <- function(file, output=NULL, ...) {
 
   nfiles = 0;
   for (f in files) {
-    pm <- read.image2k(f, ...);
+    pm <- p2k.read(f, ...);
     if (nfiles == 0) {
       sum <- pm;
     } else {
@@ -42,6 +42,6 @@ imagemean <- function(file, output=NULL, ...) {
   if (is.null(output)) {
     return(sum);
   } else {
-    write.image2k(output, pm);
+    p2k.write(output, pm);
   }
 }

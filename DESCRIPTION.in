@@ -14,4 +14,4 @@ Description: image2k creates pixmaps from any image file that is
   ImageMagick.)
 License: MIT + file LICENSE
 Depends: pixmap
-Suggests: digest
+Suggests: digest, getopt, methods
