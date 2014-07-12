@@ -4,9 +4,12 @@
 
 ## apparently pixmap (which comes in with image2k) requires methods,
 ## and quietly=TRUE doesn't seemt to propagate down.
-require(methods, quietly=TRUE);
-require(digest, quietly=TRUE);
-require(getopt, quietly=TRUE);
+if ((require(methods, quietly=TRUE) == FALSE)
+    || (require(digest, quietly=TRUE) == FALSE)
+    || (require(getopt, quietly=TRUE) == FALSE)) {
+  stop("required library missing (package requires 'image2k', 'methods', 'digest', and 'getopt'");
+}
+
 ## image2k is required below (in case it comes from a special library)
 
 usage <- function(spec) {
@@ -54,9 +57,12 @@ parserun <- function(args) {
   file <- opts$file;
 
   if (is.null(opts$image2klib)) {
-    require(image2k, quietly=TRUE);
-  } else {
-    require(image2k, lib.loc=opts$image2klib, quietly=TRUE);
+    if (require(image2k, quietly=TRUE) == FALSE) {
+      stop("required library image2k missing");
+    }
+  } else if (require(image2k, lib.loc=opts$image2klib, quietly=TRUE) == FALSE) {
+    stop(sprintf(
+      "required library image2k from library %s missing", opts$image2klib));
   }
 
   ## now, read in the standard against which we should compare (the
