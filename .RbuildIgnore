@@ -4,6 +4,7 @@
 ^autom4te.cache$
 ^__TMP__$
 .*.tar.gz
+^man/image2k-package.Rd$
 ^R/image2k.R$
 ^src/\.libs$
 ^src/.*.o$
@@ -13,3 +14,6 @@
 ^src/imagemean.*$
 ^src/imagehist.*$
 ^src/imagergb.*$
+^tests/c-L1001745.[2k].imagehist.txt$
+^tests/c-L1001745.[2k].imagemean.png$
+^tests/c-L1001745.[2k].imagergb.txt$
