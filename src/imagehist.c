@@ -16,6 +16,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
 
 
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +42,23 @@ usage(char *cmd) {
     fprintf(stderr, "usage: %s infile1 [infile2 ...]\n", cmd);
     exit(1);
 }
+
+
+
+/*
+ * print for image2k routines
+ */
+
+static int
+myerrprint(const char *restrict format, ...) {
+    va_list ap;
+
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+    return(0);                  /* we can't [easily] match the spec... */
+}
+
 
 
 /*
@@ -139,6 +157,7 @@ main(int argc, char *argv[]) {
     char *cmd = argv[0];
     readfile_t readfile;
     int flag2 = 0, flagk = 0;
+    im2k_t im2k;
     
     while ((ch = getopt(argc, argv, "2hk")) != -1) {
         switch (ch) {
@@ -194,12 +213,17 @@ main(int argc, char *argv[]) {
 #error Need Imlib2 or ImageMagick -- neither defined at compilation time
 #endif /* defined(HAVE_IMLIB2) && defined(HAVE_MAGICKWAND) */
 
+    im2k.errprint = myerrprint;
+    im2k.exit = exit;
+    im2k.malloc = malloc;
+    im2k.cookie = 0;
+
     if (argc < 1) {
         usage(cmd);
         /*NOTREACHED*/
     }
     while (argc > 0) {
-        (readfile)(0, argv[0], fhw, addhist);
+        (readfile)(&im2k, argv[0], fhw, addhist);
         argv++;
         argc--;
     }

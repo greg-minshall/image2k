@@ -31,7 +31,7 @@ typedef struct {
     /*
      * some calls that might need to be over-ridden (for R, say).
      */
-    int (*fprintf)(FILE * restrict stream, const char *restrict format, ...);
+    int (*errprint)(const char *restrict format, ...);
     void (*exit)(int status);
     void *(*malloc)(size_t size);
 } im2k_t, *im2k_p;

@@ -104,19 +104,11 @@ transposei(mytype_p mp, int i) {
 
 
 static int
-myfprintf(FILE * restrict stream, const char *restrict format, ...) {
+myerrprint(const char *restrict format, ...) {
     va_list ap;
 
     va_start(ap, format);
-    if (stream == stderr) {
-        REvprintf(format, ap);
-    } else if (stream == stdout) {
-        Rvprintf(format, ap);
-    } else {
-        /* messy */
-        REprintf("%s:%d: unable to print to correct stream: ", __FILE__, __LINE__);
-        REvprintf(format, ap);
-    }
+    REvprintf(format, ap);
     va_end(ap);
     return(0);                  /* we can't [easily] match the spec... */
 }
@@ -279,7 +271,7 @@ image2kread(SEXP args) {
 
     mp = mytypecreate();
 
-    im2k.fprintf = myfprintf;
+    im2k.errprint = myerrprint;
     im2k.exit = myexit;
     im2k.malloc = mymalloc;
     im2k.cookie = mp;
@@ -374,7 +366,7 @@ image2kwrite(SEXP args) {
     mp->rg = REAL(mp->sg);
     mp->rb = REAL(mp->sb);
 
-    im2k.fprintf = myfprintf;
+    im2k.errprint = myerrprint;
     im2k.exit = myexit;
     im2k.malloc = mymalloc;
     im2k.cookie = mp;

@@ -125,8 +125,8 @@ readfile2(im2k_p im2k, const char *file, fhwcall_t dofhw, process_t dopix) {
     if (x == NULL) {
         Imlib_Load_Error error_return;
         x = imlib_load_image_with_error_return(file, &error_return);
-        im2k->fprintf(stderr, "unable to open \"%s\": %s\n",
-                      file, image_decode_load_error(error_return));
+        im2k->errprint("unable to open \"%s\": %s\n",
+                       file, image_decode_load_error(error_return));
         im2k->exit(7);
         /*NOTREACHED*/
     }
@@ -161,8 +161,8 @@ writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
     Imlib_Load_Error imerr;
 
     if (depth != 8) {
-        im2k->fprintf(stderr,
-                      "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
+        im2k->errprint(
+            "%s:%d: Imlib2 is unable to write an image of %d bits per channel (only 8 is allowed).\n",
                 __FILE__, __LINE__, depth);
         im2k->exit(8);
         /*NOTREACHED*/
@@ -171,7 +171,7 @@ writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
     len = hhh*www;
     outdata = (DATA32 *)malloc(len*(sizeof (DATA32)));
     if (outdata == NULL) {
-        im2k->fprintf(stderr, "no room for output buffer\n");
+        im2k->errprint("no room for output buffer\n");
         im2k->exit(9);
         /*NOTREACHED*/
     }
@@ -193,7 +193,7 @@ writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
     }
     outimage = imlib_create_image_using_data(www, hhh, outdata);
     if (outimage == NULL) {
-        im2k->fprintf(stderr, "unable to create output image structures (internal): ");
+        im2k->errprint("unable to create output image structures (internal): ");
         perror("");             /* XXX */
         im2k->exit(10);
         /*NOTREACHED*/
@@ -201,7 +201,7 @@ writefile2(im2k_p im2k, const char *ofile, unsigned int hhh,
     imlib_context_set_image(outimage);    
     imlib_save_image_with_error_return(ofile, &imerr);
     if (imerr != IMLIB_LOAD_ERROR_NONE) {
-        im2k->fprintf(stderr, "error saving output file \"%s\": ", ofile);
+        im2k->errprint("error saving output file \"%s\": ", ofile);
         perror("");             /* XXX */
         im2k->exit(10);
         /*NOTREACHED*/
@@ -225,7 +225,7 @@ ThrowWandException(im2k_p im2k, MagickWand *wand) {
     ExceptionType severity;
 
     description = MagickGetException(wand,&severity);
-    im2k->fprintf(stderr,"%s %s %lu %s\n", GetMagickModule(), description);
+    im2k->errprint("%s %s %lu %s\n", GetMagickModule(), description);
     description = (char *) MagickRelinquishMemory(description);
     im2k->exit(-1);
     /*NOTREACHED*/

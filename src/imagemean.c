@@ -29,6 +29,7 @@ L1001611.tif TIFF 5976x3992 5976x3992+0+0 16-bit sRGB 143.2MB 0.000u 0:00.009
  * % ./a.out -o 130-139.png ~/Downloads/tmp/sensorproblem/L100013?.tif
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,23 @@ usage(char *cmd) {
     fprintf(stderr, "usage: %s [-2|-k] -[f]o outfile infile1 [infile2 ...]\n", cmd);
     exit(1);
 }
+
+
+/*
+ * print for image2k routines
+ */
+
+static int
+myerrprint(const char *restrict format, ...) {
+    va_list ap;
+
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+    return(0);                  /* we can't [easily] match the spec... */
+}
+
+
 
 
 /*
@@ -244,7 +262,7 @@ main(int argc, char *argv[]) {
         }
     }
 
-    im2k.fprintf = fprintf;
+    im2k.errprint = myerrprint;
     im2k.exit = exit;
     im2k.malloc = malloc;
     im2k.cookie = 0;
