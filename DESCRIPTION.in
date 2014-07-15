@@ -6,6 +6,7 @@ Priority: other
 Date: 2014-06-24
 Author: Greg Minshall
 Maintainer: Greg Minshall <minshall@acm.org>
+URL: https://github.com/greg-minshall/image2k
 Description: image2k creates pixmaps from any image file that is
   supported by the Imlib2 and/or MagickWand libraries (assuming one or
   both of these libraries are available on your machine).  similarly,
@@ -15,3 +16,7 @@ Description: image2k creates pixmaps from any image file that is
 License: MIT + file LICENSE
 Depends: pixmap
 Suggests: digest, getopt, methods
+SystemRequirements: libImlib2, libMagickWand
+Note: image2k requires *one* of libImlib2, libMagickWand, though if
+      both are on the system, that will provide more flexibility at
+      run time.
