@@ -1,4 +1,4 @@
-#+TITLE: imagemean
+#+TITLE: image2k
 #+Options: num:nil
 #+STARTUP: odd
 #+Style: <style> h1,h2,h3 {font-family: arial, helvetica, sans-serif} </style>
@@ -6,6 +6,20 @@
 * Overview
 
 ** Synopsis
+image2k is an [[http://www.r-project.org/][R]] package which allows reading and writing of image
+files.  image2k requires one (or both) of the following system
+libraries to be installed on the system on which it is built and run:
+[[http://docs.enlightenment.org/api/imlib2/html/][Imlib2]] and [[http://www.imagemagick.org/script/magick-wand.php][MagickWand]].
+
+the image2k source tree also includes some command line utilities
+(imagemean, imagehist, imagergb) that can be manually built by, e.g.,
+#+BEGIN_EXAMPLE
+./configure
+cd src
+make imagemean
+#+END_EXAMPLE
+
+one of the tools is imagemean:
 #+BEGIN_EXAMPLE
 imagemean -o <outfile> <inputfile1> [<inputfile2> ...]
 #+END_EXAMPLE
