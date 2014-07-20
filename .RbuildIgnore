@@ -4,7 +4,6 @@
 ^autom4te.cache$
 ^__TMP__$
 .*.tar.gz
-^man/image2k-package.Rd$
 ^R/image2k.R$
 ^src/\.libs$
 ^src/.*.o$
